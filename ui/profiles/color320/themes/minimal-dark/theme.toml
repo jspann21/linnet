@@ -1,0 +1,28 @@
+[theme]
+id = "linnet.theme.minimal-dark"
+name = "Minimal Dark"
+style = "standard"
+layout = "minimal"
+font = "../../../../../sdk/assets/font-sans14.json"
+font_license = "../../../../../sdk/assets/FONT-LICENSE.txt"
+
+[colors]
+foreground = "#ffffff"
+background = "#171717"
+accent = "#ffffff"
+muted = "#aaaaaa"
+panel = "#383838"
+selection_fg = "#171717"
+selection_bg = "#ffffff"
+status_fg = "#ffffff"
+status_bg = "#171717"
+border = "#383838"
+battery = "#ffffff"
+
+[metrics]
+row_height = 28
+padding = 6
+
+[assets]
+music = "../../../../../themes/default/music.ppm"
+artwork = "../../../../../themes/default/artwork.ppm"

@@ -1,0 +1,5 @@
+[app]
+id = "linnet.system.photos-options"
+title = "Photo controls"
+entry = "screen.tsx"
+capabilities = ["ui"]

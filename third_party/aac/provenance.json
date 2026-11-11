@@ -1,0 +1,480 @@
+{
+  "repository": "https://github.com/Rockbox/rockbox",
+  "commit": "99c18f336c730f533d3b7d2d8951f5dc4a6da802",
+  "files": [
+    {
+      "file": "faad/analysis.h",
+      "source_sha256": "1560ad285b3821ae9c66ad1453c33a6fc9674c7f1b39860af1709d460f0c43c8",
+      "import_sha256": "1560ad285b3821ae9c66ad1453c33a6fc9674c7f1b39860af1709d460f0c43c8",
+      "modified": false
+    },
+    {
+      "file": "faad/codebook/hcb.h",
+      "source_sha256": "3f375a557f3ddf01d01d6c547fda5eadd95fc93b90ef2918e31fa8595d59ded5",
+      "import_sha256": "3f375a557f3ddf01d01d6c547fda5eadd95fc93b90ef2918e31fa8595d59ded5",
+      "modified": false
+    },
+    {
+      "file": "faad/codebook/hcb_1.h",
+      "source_sha256": "2008909130884ad1f4d9af5f0081473644b04acd24757828a87e37175441f019",
+      "import_sha256": "2008909130884ad1f4d9af5f0081473644b04acd24757828a87e37175441f019",
+      "modified": false
+    },
+    {
+      "file": "faad/codebook/hcb_10.h",
+      "source_sha256": "13621fa45b0519a5a6594b539a37253d2b08adf809490a3652e9d44a94c02dea",
+      "import_sha256": "13621fa45b0519a5a6594b539a37253d2b08adf809490a3652e9d44a94c02dea",
+      "modified": false
+    },
+    {
+      "file": "faad/codebook/hcb_11.h",
+      "source_sha256": "ca762c04c1071e5fda419285cf91a1aaa1d1b1f94322f17879adad42af91bc8c",
+      "import_sha256": "ca762c04c1071e5fda419285cf91a1aaa1d1b1f94322f17879adad42af91bc8c",
+      "modified": false
+    },
+    {
+      "file": "faad/codebook/hcb_2.h",
+      "source_sha256": "0d7c8a7d5812fcca02399e840c34c7627ad067be3602f32555428ff083765901",
+      "import_sha256": "0d7c8a7d5812fcca02399e840c34c7627ad067be3602f32555428ff083765901",
+      "modified": false
+    },
+    {
+      "file": "faad/codebook/hcb_3.h",
+      "source_sha256": "68e07f2d87353b13a4f4ea69774bfd6067cebd19c23e22defac16c7222916a07",
+      "import_sha256": "68e07f2d87353b13a4f4ea69774bfd6067cebd19c23e22defac16c7222916a07",
+      "modified": false
+    },
+    {
+      "file": "faad/codebook/hcb_4.h",
+      "source_sha256": "b3af76e290c17af8a902733f67e6dda651b705bd7ed6f7e94dd8c3d8041f5468",
+      "import_sha256": "b3af76e290c17af8a902733f67e6dda651b705bd7ed6f7e94dd8c3d8041f5468",
+      "modified": false
+    },
+    {
+      "file": "faad/codebook/hcb_5.h",
+      "source_sha256": "3f22ed33530ca14b78469012c36656a02852cbfb426cbff6c387ed61b785537a",
+      "import_sha256": "3f22ed33530ca14b78469012c36656a02852cbfb426cbff6c387ed61b785537a",
+      "modified": false
+    },
+    {
+      "file": "faad/codebook/hcb_6.h",
+      "source_sha256": "8a6d3fddd7c0a8b476b1da3e94d612d92bcc9eda7039567dff138e30ed446673",
+      "import_sha256": "8a6d3fddd7c0a8b476b1da3e94d612d92bcc9eda7039567dff138e30ed446673",
+      "modified": false
+    },
+    {
+      "file": "faad/codebook/hcb_7.h",
+      "source_sha256": "bd0c543b613a7b9fcdd03e777b3eb5bcca50556e095afd760a93def55482ccf3",
+      "import_sha256": "bd0c543b613a7b9fcdd03e777b3eb5bcca50556e095afd760a93def55482ccf3",
+      "modified": false
+    },
+    {
+      "file": "faad/codebook/hcb_8.h",
+      "source_sha256": "25d796509d9863cdafa2e8d78e225b07246cb7ab7221d5efdd8e2fc005865e9d",
+      "import_sha256": "25d796509d9863cdafa2e8d78e225b07246cb7ab7221d5efdd8e2fc005865e9d",
+      "modified": false
+    },
+    {
+      "file": "faad/codebook/hcb_9.h",
+      "source_sha256": "c65f062afb96d488a1500ed47fbc3eecede98a2b197be73fea8ca3e4ab8bf256",
+      "import_sha256": "c65f062afb96d488a1500ed47fbc3eecede98a2b197be73fea8ca3e4ab8bf256",
+      "modified": false
+    },
+    {
+      "file": "faad/codebook/hcb_sf.h",
+      "source_sha256": "217ab13233b5e612d96b6f5b90641a7c0d1d3ca410d9abee467ec1eab1f87b62",
+      "import_sha256": "217ab13233b5e612d96b6f5b90641a7c0d1d3ca410d9abee467ec1eab1f87b62",
+      "modified": false
+    },
+    {
+      "file": "faad/common.c",
+      "source_sha256": "035159d0dd1e8cd04d7d54be73bda87d83f077dbcfa08429596705a11ac421da",
+      "import_sha256": "28ab75486540a6c48ef90003fb705ed099ff887972ca7c8d878027288998fc6d",
+      "modified": true
+    },
+    {
+      "file": "faad/common.h",
+      "source_sha256": "7fb148946b68a7b71aa8702b260a224b6b317e5e0614ae01c956bc8e01ce21dc",
+      "import_sha256": "f8a2d50954e53bf4c45622ebace891d8f4b529134c9074f1f890d8509770d415",
+      "modified": true
+    },
+    {
+      "file": "faad/COPYING",
+      "source_sha256": "c5ec6fe8072d2371385231b9844e61e0dc7466300e17e00eb9a64fff3fdf4aa4",
+      "import_sha256": "c5ec6fe8072d2371385231b9844e61e0dc7466300e17e00eb9a64fff3fdf4aa4",
+      "modified": false
+    },
+    {
+      "file": "faad/decoder.c",
+      "source_sha256": "cc3b664ad532d50bf0d46e7bd2d3014533f789d0bec76b9cf57c174507fff560",
+      "import_sha256": "63ade915fc6e4f36fea2d70c1c4fa485ae9eb9a473b5a7464b3a3c4fa00cfa77",
+      "modified": true
+    },
+    {
+      "file": "faad/decoder.h",
+      "source_sha256": "e0726a53800f2f7764bab298072c57294918e30807864273e624ed4226718207",
+      "import_sha256": "e0726a53800f2f7764bab298072c57294918e30807864273e624ed4226718207",
+      "modified": false
+    },
+    {
+      "file": "faad/drc.c",
+      "source_sha256": "de0fb12bfb24049df741ab1069f4d99fdf057b735b7397beca39954aaa8c3283",
+      "import_sha256": "a5df1713cca6bd0fd5ff4098fee6c40fdb697908886b6eabef1dbd021e71b3c4",
+      "modified": true
+    },
+    {
+      "file": "faad/drc.h",
+      "source_sha256": "bb5bd445fd6714ffff97c331843c2b948a1f50d80d4184d13dae982d5be65849",
+      "import_sha256": "bb5bd445fd6714ffff97c331843c2b948a1f50d80d4184d13dae982d5be65849",
+      "modified": false
+    },
+    {
+      "file": "faad/drm_dec.h",
+      "source_sha256": "c8e06fccf78c8f3ff23acc3498105cbea889c3913846d7e4adc56b57165e4c67",
+      "import_sha256": "c8e06fccf78c8f3ff23acc3498105cbea889c3913846d7e4adc56b57165e4c67",
+      "modified": false
+    },
+    {
+      "file": "faad/error.c",
+      "source_sha256": "ffba7d580d29a36bc09c9750c1ad772f34a25e612acf3e1e97b10f4f831e167b",
+      "import_sha256": "ffba7d580d29a36bc09c9750c1ad772f34a25e612acf3e1e97b10f4f831e167b",
+      "modified": false
+    },
+    {
+      "file": "faad/error.h",
+      "source_sha256": "ae185ae242fe4b8b31f91dc2be66c92e5cddef56bc8e4bd36b58324a3c118bc7",
+      "import_sha256": "ae185ae242fe4b8b31f91dc2be66c92e5cddef56bc8e4bd36b58324a3c118bc7",
+      "modified": false
+    },
+    {
+      "file": "faad/faad_config.h",
+      "source_sha256": "9d9fa13274453eb4b7eed0f626ec7cdc2610950c335dc13f8c1984d5685455de",
+      "import_sha256": "ec409be32650680ecacce4a09796770853bd99fe4c3be5d4d4d826a50d3a16a2",
+      "modified": true
+    },
+    {
+      "file": "faad/filtbank.c",
+      "source_sha256": "da9ebdd8588a100aacb12b28d2691f923123781198c295faefe67a2ac291e2fc",
+      "import_sha256": "79d82b4025af62461b77424af82a9c55d3a42e3fac94b7f4162be0eaa41c142f",
+      "modified": true
+    },
+    {
+      "file": "faad/filtbank.h",
+      "source_sha256": "54c7411cfefd02c2723d3f671ae587f704d3b9eaac6d615775c513648e6ca072",
+      "import_sha256": "54c7411cfefd02c2723d3f671ae587f704d3b9eaac6d615775c513648e6ca072",
+      "modified": false
+    },
+    {
+      "file": "faad/fixed.h",
+      "source_sha256": "96c86e048720494fae829a1d2af88a249f4e842490f81cf1942d223f4d826677",
+      "import_sha256": "96c86e048720494fae829a1d2af88a249f4e842490f81cf1942d223f4d826677",
+      "modified": false
+    },
+    {
+      "file": "faad/huffman.c",
+      "source_sha256": "be1ddf3feaaf799e6d40be51ddce6c12699938753633df714aeacaa10ce50498",
+      "import_sha256": "02dd3010eb62ae1fb317db5874de93edd91f114b7639b8ef4407ef535fe2d825",
+      "modified": true
+    },
+    {
+      "file": "faad/huffman.h",
+      "source_sha256": "f805dd060959dede76ced01dd54c9decbd772dd2c7ab2cee7ecfe0887195adbe",
+      "import_sha256": "f805dd060959dede76ced01dd54c9decbd772dd2c7ab2cee7ecfe0887195adbe",
+      "modified": false
+    },
+    {
+      "file": "faad/ic_predict.h",
+      "source_sha256": "a8db079777c49fc247c70283239b210b71e01f62d08db772b4ddb5b4d3164e89",
+      "import_sha256": "a8db079777c49fc247c70283239b210b71e01f62d08db772b4ddb5b4d3164e89",
+      "modified": false
+    },
+    {
+      "file": "faad/iq_table.h",
+      "source_sha256": "d91ed9ebe9d0c130eb4c07ccf3f339729d2fa969e139db42790dae00967fee72",
+      "import_sha256": "d91ed9ebe9d0c130eb4c07ccf3f339729d2fa969e139db42790dae00967fee72",
+      "modified": false
+    },
+    {
+      "file": "faad/is.c",
+      "source_sha256": "1b782d5072f33fb962c82f1304455c5981eb1d27b3c054f38bbc9236c8ed7a80",
+      "import_sha256": "1b782d5072f33fb962c82f1304455c5981eb1d27b3c054f38bbc9236c8ed7a80",
+      "modified": false
+    },
+    {
+      "file": "faad/is.h",
+      "source_sha256": "31dff016cd498dc4f617676c1414c82f0f95a6df5337651f4242780ca5892aef",
+      "import_sha256": "31dff016cd498dc4f617676c1414c82f0f95a6df5337651f4242780ca5892aef",
+      "modified": false
+    },
+    {
+      "file": "faad/kbd_win.h",
+      "source_sha256": "9c9fece33c28ce84595b39b4b3c3ea7dfc614a713a5d0d6709fd76fc11a63d3c",
+      "import_sha256": "9c9fece33c28ce84595b39b4b3c3ea7dfc614a713a5d0d6709fd76fc11a63d3c",
+      "modified": false
+    },
+    {
+      "file": "faad/lt_predict.h",
+      "source_sha256": "09d2a4b019dbc315899d5a4be14b8776e2cf7d3662653ae0d49bf9c93f224b0b",
+      "import_sha256": "09d2a4b019dbc315899d5a4be14b8776e2cf7d3662653ae0d49bf9c93f224b0b",
+      "modified": false
+    },
+    {
+      "file": "faad/mp4.c",
+      "source_sha256": "7d4ef750fb27cf4d813a7b2a9177b822bd998c175b97eeed03b61453893d3024",
+      "import_sha256": "e1ea600ba900d15de7430144bb59ac7a285ce1561ceb7f6d031375f4065c892e",
+      "modified": true
+    },
+    {
+      "file": "faad/mp4.h",
+      "source_sha256": "93cecef59a40cf0fd26307fdbe86e29d33a962674588c0e2f26937faeff9ea7c",
+      "import_sha256": "93cecef59a40cf0fd26307fdbe86e29d33a962674588c0e2f26937faeff9ea7c",
+      "modified": false
+    },
+    {
+      "file": "faad/ms.c",
+      "source_sha256": "d0071218d503e855f55c74d941392dccf453284df4f9e81ed501cfcce1c95077",
+      "import_sha256": "d0071218d503e855f55c74d941392dccf453284df4f9e81ed501cfcce1c95077",
+      "modified": false
+    },
+    {
+      "file": "faad/ms.h",
+      "source_sha256": "fda9ef2ba35e2704b4edb759e577acad03347e35b62ebc499a5d2458a58dc42e",
+      "import_sha256": "fda9ef2ba35e2704b4edb759e577acad03347e35b62ebc499a5d2458a58dc42e",
+      "modified": false
+    },
+    {
+      "file": "faad/output.h",
+      "source_sha256": "f20bf90a4d737caeb65c0583d9101bebca9820d9106e6548a1f7b1b09c8940e0",
+      "import_sha256": "f20bf90a4d737caeb65c0583d9101bebca9820d9106e6548a1f7b1b09c8940e0",
+      "modified": false
+    },
+    {
+      "file": "faad/pns.c",
+      "source_sha256": "c2bd5afbed85ef7d8be2c686a372bd1adc45f9c68ccdbae478d17649273ff5c9",
+      "import_sha256": "4b74fe6493fca5133ee546e8436c44343629068b302801e24b419246e07e84da",
+      "modified": true
+    },
+    {
+      "file": "faad/pns.h",
+      "source_sha256": "9203d63e4a834eceac8d3f2235a985513527a1525d6d6f65cd7f97350ca2cb99",
+      "import_sha256": "9203d63e4a834eceac8d3f2235a985513527a1525d6d6f65cd7f97350ca2cb99",
+      "modified": false
+    },
+    {
+      "file": "faad/ps_dec.h",
+      "source_sha256": "d5a43335aea1184a1a9dd0cdf91059b24557260c1d6cffed02d157767e8a1510",
+      "import_sha256": "d5a43335aea1184a1a9dd0cdf91059b24557260c1d6cffed02d157767e8a1510",
+      "modified": false
+    },
+    {
+      "file": "faad/ps_tables.h",
+      "source_sha256": "df34743ae1d1396f696be3bc91c16df2509c4aa1901e7a44f24261c5220fce38",
+      "import_sha256": "df34743ae1d1396f696be3bc91c16df2509c4aa1901e7a44f24261c5220fce38",
+      "modified": false
+    },
+    {
+      "file": "faad/pulse.c",
+      "source_sha256": "47cf121db59aa239a6be60a8cb195d370a7c996153c01c93b2a3af455786a177",
+      "import_sha256": "47cf121db59aa239a6be60a8cb195d370a7c996153c01c93b2a3af455786a177",
+      "modified": false
+    },
+    {
+      "file": "faad/pulse.h",
+      "source_sha256": "c328d69c2b1f7ff1103585399de270aab12444c1337c497dd4a8c6790904950a",
+      "import_sha256": "c328d69c2b1f7ff1103585399de270aab12444c1337c497dd4a8c6790904950a",
+      "modified": false
+    },
+    {
+      "file": "faad/rvlc.h",
+      "source_sha256": "975cb41326d05830ce014f6dd3197c8643ad9f3a89708c19587084877184c14a",
+      "import_sha256": "975cb41326d05830ce014f6dd3197c8643ad9f3a89708c19587084877184c14a",
+      "modified": false
+    },
+    {
+      "file": "faad/sbr_dct.h",
+      "source_sha256": "295e972291b530e2f3167379e52961281c374b904ac46e1b3e0ce65ce2cc11f3",
+      "import_sha256": "295e972291b530e2f3167379e52961281c374b904ac46e1b3e0ce65ce2cc11f3",
+      "modified": false
+    },
+    {
+      "file": "faad/sbr_dec.h",
+      "source_sha256": "889f282417c2bcfbe925abd11fb4b483634ae631453fca05af51577f9aabf039",
+      "import_sha256": "889f282417c2bcfbe925abd11fb4b483634ae631453fca05af51577f9aabf039",
+      "modified": false
+    },
+    {
+      "file": "faad/sbr_e_nf.h",
+      "source_sha256": "91fdb2695a65104fe444c969d097a7b199ddd7478586f01c5040592002d4bc27",
+      "import_sha256": "91fdb2695a65104fe444c969d097a7b199ddd7478586f01c5040592002d4bc27",
+      "modified": false
+    },
+    {
+      "file": "faad/sbr_fbt.h",
+      "source_sha256": "862fc99d4587789a04396c72257bbcc224a3c9ab69e9109a142f69e84db2e9cc",
+      "import_sha256": "862fc99d4587789a04396c72257bbcc224a3c9ab69e9109a142f69e84db2e9cc",
+      "modified": false
+    },
+    {
+      "file": "faad/sbr_hfadj.h",
+      "source_sha256": "72d111c63b7c5e27e76b91c4beddc1f8372eb152b3052d2d44566defc24b0986",
+      "import_sha256": "72d111c63b7c5e27e76b91c4beddc1f8372eb152b3052d2d44566defc24b0986",
+      "modified": false
+    },
+    {
+      "file": "faad/sbr_hfgen.h",
+      "source_sha256": "73e6cf2d8ec73961e02199162de5753f78c7d94afc631728ac6b9c78e7dee8f0",
+      "import_sha256": "73e6cf2d8ec73961e02199162de5753f78c7d94afc631728ac6b9c78e7dee8f0",
+      "modified": false
+    },
+    {
+      "file": "faad/sbr_huff.h",
+      "source_sha256": "d643e150a225f9d5ff72c68b5fbcb6b59702f3dcf1e016c504a9442a47c2d05a",
+      "import_sha256": "d643e150a225f9d5ff72c68b5fbcb6b59702f3dcf1e016c504a9442a47c2d05a",
+      "modified": false
+    },
+    {
+      "file": "faad/sbr_noise.h",
+      "source_sha256": "77ae9ea9951b4f27bd697eb287b1d91ab4d7a98fa53538541e9ceb93c46524a0",
+      "import_sha256": "77ae9ea9951b4f27bd697eb287b1d91ab4d7a98fa53538541e9ceb93c46524a0",
+      "modified": false
+    },
+    {
+      "file": "faad/sbr_qmf.h",
+      "source_sha256": "e5fe02d8eaad44b3356c5059b159c0336d2ad19852b35530dec06b27ab041589",
+      "import_sha256": "e5fe02d8eaad44b3356c5059b159c0336d2ad19852b35530dec06b27ab041589",
+      "modified": false
+    },
+    {
+      "file": "faad/sbr_qmf_c.h",
+      "source_sha256": "1d469d036a1b1d8428daee63ad9f33ebf84ae242d225b48573ea4cfabd57f85f",
+      "import_sha256": "1d469d036a1b1d8428daee63ad9f33ebf84ae242d225b48573ea4cfabd57f85f",
+      "modified": false
+    },
+    {
+      "file": "faad/sbr_syntax.h",
+      "source_sha256": "005ae9a9410d15d1b061a971190d01b95b3116d7342c66a72af6c9a03b0345fa",
+      "import_sha256": "005ae9a9410d15d1b061a971190d01b95b3116d7342c66a72af6c9a03b0345fa",
+      "modified": false
+    },
+    {
+      "file": "faad/sbr_tf_grid.h",
+      "source_sha256": "3da807160d58cbd460a032f7ebafd38cb55a683202ce166dc254dc67fbfd3013",
+      "import_sha256": "3da807160d58cbd460a032f7ebafd38cb55a683202ce166dc254dc67fbfd3013",
+      "modified": false
+    },
+    {
+      "file": "faad/sine_win.h",
+      "source_sha256": "f4305d04649a07107be38deaa37e1737de0e310bd2cbe53d5c89e9e39175d81e",
+      "import_sha256": "f4305d04649a07107be38deaa37e1737de0e310bd2cbe53d5c89e9e39175d81e",
+      "modified": false
+    },
+    {
+      "file": "faad/specrec.c",
+      "source_sha256": "c4dad31ebdbbcf080af57d81557586dcf720ca328a3589843f73293acd0e13e1",
+      "import_sha256": "61062173bcfa7fd656a4e08314c4e61b8cd66a18428a0471decc877370f326bd",
+      "modified": true
+    },
+    {
+      "file": "faad/specrec.h",
+      "source_sha256": "fff97bca976ee7f3a6c3ee94878cf4c09b03923569b41be97560721c82ed4ccb",
+      "import_sha256": "fff97bca976ee7f3a6c3ee94878cf4c09b03923569b41be97560721c82ed4ccb",
+      "modified": false
+    },
+    {
+      "file": "faad/structs.h",
+      "source_sha256": "c285c2e0b513b54406fefcc6f4f1df1a060c04a52649fe5be47f51cc769d2836",
+      "import_sha256": "c285c2e0b513b54406fefcc6f4f1df1a060c04a52649fe5be47f51cc769d2836",
+      "modified": false
+    },
+    {
+      "file": "faad/syntax.c",
+      "source_sha256": "482a39be253e7d15a24f84d1c525116acac00d73de2a261a0e0e8db87623387e",
+      "import_sha256": "37fe8f10505ac722f9bc0d63754bce93024f19a3aef11fb9e89d5178daee865a",
+      "modified": true
+    },
+    {
+      "file": "faad/syntax.h",
+      "source_sha256": "26bba5268f4e4fd23a781e730566e3fe44a58c62acc18225ec63f989e2b643a6",
+      "import_sha256": "26bba5268f4e4fd23a781e730566e3fe44a58c62acc18225ec63f989e2b643a6",
+      "modified": false
+    },
+    {
+      "file": "faad/tns.c",
+      "source_sha256": "10a87037d33898d3a73f5b924dfd0d8752abdc1677447fd282efe237e90323d5",
+      "import_sha256": "97920a784c492c69180b18de1e5af628ec9eb0003210ceba98759c63db547992",
+      "modified": true
+    },
+    {
+      "file": "faad/tns.h",
+      "source_sha256": "40ffffd4313412867ba3581740d0df6bbeb0961574c002514aeb09e892eb0cb0",
+      "import_sha256": "40ffffd4313412867ba3581740d0df6bbeb0961574c002514aeb09e892eb0cb0",
+      "modified": false
+    },
+    {
+      "file": "lib/asm_arm.h",
+      "source_sha256": "ea2a243c80f258cde2a19d889d0795681e04bf5e6ee84e3c8d2c97c8abdf50d0",
+      "import_sha256": "ea2a243c80f258cde2a19d889d0795681e04bf5e6ee84e3c8d2c97c8abdf50d0",
+      "modified": false
+    },
+    {
+      "file": "lib/asm_mcf5249.h",
+      "source_sha256": "6c1d0deb30213876206ba0c130be767e971adf2e6f1d0eaca05b062dab54387f",
+      "import_sha256": "6c1d0deb30213876206ba0c130be767e971adf2e6f1d0eaca05b062dab54387f",
+      "modified": false
+    },
+    {
+      "file": "lib/codeclib_misc.h",
+      "source_sha256": "e72d68ca9e2dfc5b575944957bd4aac13404ed9cdd06258158e358e6e37881ad",
+      "import_sha256": "e72d68ca9e2dfc5b575944957bd4aac13404ed9cdd06258158e358e6e37881ad",
+      "modified": false
+    },
+    {
+      "file": "lib/fft-ffmpeg.c",
+      "source_sha256": "36cb465d9a9c343e9a60898cf424bf1d835fc136c49705e7636174cdb48b1b93",
+      "import_sha256": "4e8c2656807572e15a65b181903ecbb1bff815ad85f4100d28ca66d106581fee",
+      "modified": true
+    },
+    {
+      "file": "lib/fft-ffmpeg_arm.h",
+      "source_sha256": "22eb85e705f925e2fe7c51f1c85db2bb195d34c0cbc3449035ad06ee0e642b51",
+      "import_sha256": "22eb85e705f925e2fe7c51f1c85db2bb195d34c0cbc3449035ad06ee0e642b51",
+      "modified": false
+    },
+    {
+      "file": "lib/fft-ffmpeg_cf.h",
+      "source_sha256": "3a1e999a2a79416c96ac7648d2e350c627261706375350b1846c37661a3d01f5",
+      "import_sha256": "3a1e999a2a79416c96ac7648d2e350c627261706375350b1846c37661a3d01f5",
+      "modified": false
+    },
+    {
+      "file": "lib/fft.h",
+      "source_sha256": "8256c8f88ef05bb8e5ce63e217cec8a05b68fe813eb5360e0fc37d628d8d5003",
+      "import_sha256": "d710a2e0913a261aeade34225bbbb598680eb1bc09db6c94617c0be577fe8bc3",
+      "modified": true
+    },
+    {
+      "file": "lib/mdct.c",
+      "source_sha256": "3e60dba80d2ce0698b30abf6c05c190f95252deb90871f0d4c4df5b72c5289ec",
+      "import_sha256": "3e60dba80d2ce0698b30abf6c05c190f95252deb90871f0d4c4df5b72c5289ec",
+      "modified": false
+    },
+    {
+      "file": "lib/mdct.h",
+      "source_sha256": "dda16bfd3647449a49565977d0a520c9f8587dffa8adf23fd02b95e21f5c7e01",
+      "import_sha256": "dda16bfd3647449a49565977d0a520c9f8587dffa8adf23fd02b95e21f5c7e01",
+      "modified": false
+    },
+    {
+      "file": "lib/mdct_lookup.c",
+      "source_sha256": "2dc47f51a5efac042b4092e6e240129e1bbfd88b942f5e5f11bb202294f902ba",
+      "import_sha256": "78e68d1ea58746230a69c165f5b7c33c814f590f471880a46d37da9d0bfc5bc2",
+      "modified": true
+    },
+    {
+      "file": "lib/mdct_lookup.h",
+      "source_sha256": "f3e7c5937c0f23458750b5ec2c7b640284fc4547172caaaa6e9b14e49adb417e",
+      "import_sha256": "f3e7c5937c0f23458750b5ec2c7b640284fc4547172caaaa6e9b14e49adb417e",
+      "modified": false
+    }
+  ]
+}

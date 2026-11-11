@@ -1,0 +1,5 @@
+[app]
+id = "linnet.system.update"
+title = "Update / Recovery"
+entry = "screen.tsx"
+capabilities = ["ui"]

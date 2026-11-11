@@ -1,0 +1,22 @@
+[theme]
+id = "linnet.theme.classic-cobalt"
+name = "Classic Cobalt"
+style = "standard"
+layout = "default"
+font = "../../../../sdk/assets/font-sans14.json"
+font_license = "../../../../sdk/assets/FONT-LICENSE.txt"
+
+[colors]
+foreground = "#182740"
+background = "#f1f5ff"
+accent = "#2455c4"
+muted = "#576b8c"
+panel = "#dce6fa"
+
+[metrics]
+row_height = 28
+padding = 6
+
+[assets]
+music = "../../../../themes/default/music.ppm"
+artwork = "../../../../themes/default/artwork.ppm"

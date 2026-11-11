@@ -1,0 +1,115 @@
+{
+  "repository": "https://github.com/Rockbox/rockbox",
+  "commit": "99c18f336c730f533d3b7d2d8951f5dc4a6da802",
+  "source_directory": "lib/rbcodec/codecs/libmad",
+  "files": [
+    {
+      "file": "COPYING",
+      "source_sha256": "da0eca0fb517ac939d167924c9d4b3f8750a6b7191932ef2cb145acfa624ac7e",
+      "import_sha256": "da0eca0fb517ac939d167924c9d4b3f8750a6b7191932ef2cb145acfa624ac7e",
+      "modified": false
+    },
+    {
+      "file": "D.dat",
+      "source_sha256": "f717523351adc926bde608b89c061df44bafa6d20f549c8fc1461445ea451edc",
+      "import_sha256": "f717523351adc926bde608b89c061df44bafa6d20f549c8fc1461445ea451edc",
+      "modified": false
+    },
+    {
+      "file": "fixed.h",
+      "source_sha256": "3421fd422e6b4aea1f21d5e87776a53d07a1bef4aa6d564a515b18b947ee8a19",
+      "import_sha256": "1d314d6b21e9ba6a96c6f38d256d0e696d014274d9a67d3f62681f243990e238",
+      "modified": true
+    },
+    {
+      "file": "frame.h",
+      "source_sha256": "e576deed69254a9932204e8bc41dbd79b6d983b4f9bebacae66566cd90eec8db",
+      "import_sha256": "3abc89dd45760680f543b10addc7318b0b6caab69ad46aa7fb6cea23b01729ef",
+      "modified": true
+    },
+    {
+      "file": "global.h",
+      "source_sha256": "dd8cda8337c65d91eca76881e29637220bc899a46e8e3caf54f8080901ada8d7",
+      "import_sha256": "9c89f33f283f16d829adee6d648a9987be7cb9f3ee405cf31c8ae51a14db4e61",
+      "modified": true
+    },
+    {
+      "file": "huffman.c",
+      "source_sha256": "4a5ceb0c9676530f86fb2ad0e7447e4adeeba1a8663e44d5564f7b0195e4caa8",
+      "import_sha256": "4a5ceb0c9676530f86fb2ad0e7447e4adeeba1a8663e44d5564f7b0195e4caa8",
+      "modified": false
+    },
+    {
+      "file": "huffman.h",
+      "source_sha256": "7088367a5aa7272b2f70651d0361f20f5a18ad877e98c1afffab5f013fee5a33",
+      "import_sha256": "7088367a5aa7272b2f70651d0361f20f5a18ad877e98c1afffab5f013fee5a33",
+      "modified": false
+    },
+    {
+      "file": "imdct_s.dat",
+      "source_sha256": "7a43cf474c5d626d15b8387bf51d878c387add6a1d587eeed4a1fdf8a86b08f4",
+      "import_sha256": "7a43cf474c5d626d15b8387bf51d878c387add6a1d587eeed4a1fdf8a86b08f4",
+      "modified": false
+    },
+    {
+      "file": "layer3.c",
+      "source_sha256": "bf69354414c9be0c3bb3574baba8ec155838b612da24e3b8c7e9b3a7dd9340e7",
+      "import_sha256": "24ff823ec158eb0367b2991ff85141a5035fe522233d4f8a40f7b73027c1dad1",
+      "modified": true
+    },
+    {
+      "file": "layer3.h",
+      "source_sha256": "d22537427bbcf687c757b7853ce53dfc60684816714a42fcc65888a585d3330c",
+      "import_sha256": "d22537427bbcf687c757b7853ce53dfc60684816714a42fcc65888a585d3330c",
+      "modified": false
+    },
+    {
+      "file": "mad.h",
+      "source_sha256": "857fb2c04566ed10d86f0c4ef9f5145ab1fdb4fe5e7fe746beb016dde74fc5cd",
+      "import_sha256": "0aa0f37b5e4c1c31e763be502556dd1cc2ccf909afd7fad2dda734b118e1cd43",
+      "modified": true
+    },
+    {
+      "file": "mad_iram.h",
+      "source_sha256": "af8b8d07c9ae49b85684610861fa4d138bab94e85b3af2903196644bd44845a2",
+      "import_sha256": "af8b8d07c9ae49b85684610861fa4d138bab94e85b3af2903196644bd44845a2",
+      "modified": false
+    },
+    {
+      "file": "rq_table.dat",
+      "source_sha256": "caffecbae8d81003b57fbacd52096c77dba142f41698e19aa46067a63078aaa8",
+      "import_sha256": "caffecbae8d81003b57fbacd52096c77dba142f41698e19aa46067a63078aaa8",
+      "modified": false
+    },
+    {
+      "file": "stream.h",
+      "source_sha256": "ada008870fb85de052779f99e7963a497f19d940af9c620fa727b22a944a906b",
+      "import_sha256": "d7bf8991a97722ac4ddd3f990597cc8c6d5e4d797705f4c61d44d467d6b5f396",
+      "modified": true
+    },
+    {
+      "file": "synth.c",
+      "source_sha256": "bac1deee142c285fe08ee4525a9e4a1e3799c3c3483714f37b26c20c102c839c",
+      "import_sha256": "bac1deee142c285fe08ee4525a9e4a1e3799c3c3483714f37b26c20c102c839c",
+      "modified": false
+    },
+    {
+      "file": "synth.h",
+      "source_sha256": "cdb8ec0a8c3b9c7ea98804f9d19c7f002fb98377fb462495f29debdfad0dabdf",
+      "import_sha256": "cdb8ec0a8c3b9c7ea98804f9d19c7f002fb98377fb462495f29debdfad0dabdf",
+      "modified": false
+    },
+    {
+      "file": "imdct_l_arm.S",
+      "source_sha256": "403e559e309ab305e754c71c80faa929ade2b717d92aedb3425d7a52f1267ed7",
+      "import_sha256": "24ce543c783e70cc8d3264f3b75477268c2baa86cf4639ebe66970685f5a33e7",
+      "modified": true
+    },
+    {
+      "file": "synth_full_arm.S",
+      "source_sha256": "fd6e3cd0c81f43436bdf81fb177898685a8bed01cbd80be42af41c3070fe2a98",
+      "import_sha256": "52e14402ceddcc6a0e7007f40a2bbb9cf8d72da68f1c8594eb1036baaf4d5c9a",
+      "modified": true
+    }
+  ]
+}

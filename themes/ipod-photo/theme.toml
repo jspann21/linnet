@@ -1,0 +1,33 @@
+[theme]
+id = "linnet.theme.ipod-photo"
+name = "iPod Photo"
+style = "apple-photo"
+layout = "ipod-photo"
+targets = ["photo4g-p98"]
+font = "../../sdk/assets/font-sans14.json"
+font_license = "../../sdk/assets/FONT-LICENSE.txt"
+
+font_source = "apple-podium-sans16"
+
+[colors]
+foreground = "#000000"
+background = "#ffffff"
+accent = "#2473cf"
+muted = "#626971"
+panel = "#e5e5e5"
+selection_fg = "#ffffff"
+selection_bg = "#2473cf"
+status_fg = "#000000"
+status_bg = "#dedede"
+border = "#999999"
+artwork_bg = "#edf0f4"
+artwork_fg = "#2473cf"
+battery = "#65b436"
+
+[metrics]
+row_height = 22
+padding = 8
+
+[assets]
+music = "../default/music.ppm"
+artwork = "../default/artwork.ppm"

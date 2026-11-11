@@ -1,0 +1,29 @@
+[theme]
+id = "linnet.theme.classic-ember"
+name = "Classic Ember"
+style = "standard"
+layout = "graphite"
+font = "../../../../sdk/assets/font-sans14.json"
+font_license = "../../../../sdk/assets/FONT-LICENSE.txt"
+
+[colors]
+foreground = "#fff0db"
+background = "#241e21"
+accent = "#ffa66b"
+muted = "#c7b5b0"
+panel = "#382c30"
+selection_fg = "#241e21"
+selection_bg = "#ffa66b"
+status_fg = "#fff0db"
+status_bg = "#382c30"
+border = "#a08580"
+artwork_bg = "#382c30"
+artwork_fg = "#ffa66b"
+
+[metrics]
+row_height = 28
+padding = 8
+
+[assets]
+music = "../../../../themes/default/music.ppm"
+artwork = "../../../../themes/default/artwork.ppm"

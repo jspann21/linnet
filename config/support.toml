@@ -1,0 +1,3 @@
+# These fields open the user's browser/mail application. They never upload reports.
+contact_url = "https://github.com/jspann21/linnet/issues/new?template=hardware-support.yml"
+email = ""

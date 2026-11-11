@@ -1,0 +1,7 @@
+[app]
+id = "linnet.system.cover-flow"
+title = "Cover Flow"
+entry = "screen.tsx"
+capabilities = ["ui", "canvas"]
+[canvas]
+draw = { source = "../../../services/music/coverflow.c", symbol = "ln_coverflow_draw" }

@@ -1,0 +1,22 @@
+[theme]
+id = "linnet.theme.default"
+name = "Linnet"
+style = "standard"
+layout = "default"
+font = "../../../../../sdk/assets/font-sans14.json"
+font_license = "../../../../../sdk/assets/FONT-LICENSE.txt"
+
+[colors]
+foreground = "#203040"
+background = "#f4f6f8"
+accent = "#2968bb"
+muted = "#617183"
+panel = "#dce5ef"
+
+[metrics]
+row_height = 28
+padding = 6
+
+[assets]
+music = "../../../../../themes/default/music.ppm"
+artwork = "../../../../../themes/default/artwork.ppm"

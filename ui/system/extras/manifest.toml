@@ -1,0 +1,5 @@
+[app]
+id = "linnet.system.extras"
+title = "Extras"
+entry = "screen.tsx"
+capabilities = ["ui"]

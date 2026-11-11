@@ -1,0 +1,20 @@
+PacketVideo MPEG-4 decoder (Apache-2.0)
+https://android.googlesource.com/platform/external/opencore/
+Commit: 61bf9af643abf0011dcf82ae8a436aeb7e8aae97
+Path: codecs_v2/video/m4v_h263/dec
+OSCL compatibility and freestanding memory operations are supplied by Linnet.
+
+Security and correctness fixes backported from AOSP frameworks/av,
+media/libstagefright/codecs/m4v_h263/dec (Android logging omitted):
+b62a73b860757143d3b140b2985fdae71e18d675 allocation overflow checks
+b2ae4351539de9aa4667fcb3e02ba40d9c6bd094 corrected allocation bounds
+257b3bc581bbc65318a4cc2d3c22a07a4429dc1d absent concealment frame
+2ad2a92318a3b9daf78ebcdc597085adbf32600d absent reference frame
+0b5726782d5f9764325057870cef2750853f286a validate dimensions before publication
+26a87d15ef97b35633577f7a97ed39bcaa800585 VLC table bounds
+e66910a57365dba191a23b5175a5d53eca876176 release decoder state on failure
+9a7689267854d2ffe24a1be2b491734757df4cee initialize allocated decoder state
+7802c68aebf7908983508fd4a52a7d53746a80eb reject invalid packet bit counts
+ef4ce157000b2b5bcbf2bcb36a228ec604803547 reject unsupported width increases
+5d8def9a0235d97fd6dfd88fb8b6b25bf98411c5 reject zero dimensions
+502b917de8d94a652c75adb0ca7d6644698f46d6 bound frame-header searches

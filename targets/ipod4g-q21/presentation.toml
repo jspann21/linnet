@@ -1,0 +1,133 @@
+clock_font = "sdk/assets/font-q21-clock22.json"
+scale_clock = false
+
+[[adjustments]]
+text = "System clock"
+dy = 3
+
+[[adjustments]]
+scene = "linnet.system.music"
+text = "Right: Actions  Menu: Back"
+y = 100
+h = 26
+
+[[adjustments]]
+scene = "linnet.system.music-queue"
+text = "Select: Actions  Menu: Back"
+y = 100
+h = 26
+
+[[adjustments]]
+scene = "linnet.system.music"
+kind = 6
+h = 75
+row_height = 15
+
+[[adjustments]]
+scene = "linnet.system.music-options"
+kind = 6
+row_height = 15
+
+[[adjustments]]
+scene = "linnet.system.music-search"
+kind = 6
+row_height = 15
+
+[[adjustments]]
+scene = "linnet.system.music-sound"
+kind = 6
+row_height = 15
+
+[[adjustments]]
+scene = "linnet.system.music-queue"
+kind = 6
+h = 75
+row_height = 15
+
+[[adjustments]]
+scene = "linnet.system.music-queue-actions"
+kind = 6
+row_height = 15
+
+[[adjustments]]
+scene = "linnet.system.music"
+kind = 9
+h = 75
+
+[[adjustments]]
+scene = "linnet.system.music-search"
+kind = 9
+h = 70
+
+[[adjustments]]
+scene = "linnet.system.music-sound"
+kind = 9
+h = 91
+
+[[adjustments]]
+scene = "linnet.system.music-queue"
+kind = 9
+h = 75
+
+[[adjustments]]
+scene = "linnet.system.sleep-timer"
+kind = 9
+h = 80
+
+[[adjustments]]
+scene = "linnet.system.clock"
+kind = 9
+y = 51
+h = 32
+
+[[adjustments]]
+scene = "linnet.system.clock"
+kind = 6
+y = 51
+h = 32
+row_height = 16
+
+[[adjustments]]
+scene = "linnet.system.clock-edit"
+kind = 9
+h = 80
+
+[[adjustments]]
+scene = "linnet.system.now-playing"
+kind = 14
+x = 2
+y = 18
+w = 64
+h = 64
+
+[[adjustments]]
+scene = "linnet.system.now-playing"
+text = "Sample track"
+x = 72
+y = 18
+w = 86
+h = 24
+
+[[adjustments]]
+scene = "linnet.system.now-playing"
+text = "Audio pending"
+x = 72
+y = 50
+w = 86
+h = 24
+
+[[adjustments]]
+scene = "linnet.system.now-playing"
+text = "Track album"
+x = 2
+y = 87
+w = 156
+h = 11
+
+[[adjustments]]
+scene = "linnet.system.now-playing"
+text = "Native playback shell"
+x = 2
+y = 100
+w = 156
+h = 11

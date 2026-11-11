@@ -1,0 +1,5 @@
+[app]
+id = "linnet.system.photos-grid"
+title = "Photos"
+entry = "screen.tsx"
+capabilities = ["ui"]

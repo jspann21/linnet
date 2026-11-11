@@ -1,0 +1,7 @@
+{
+  "target_id": "photo4g-p98",
+  "scratch_bytes": 1048576,
+  "random_reads": 256,
+  "seed": 1099,
+  "fault_modes": [1, 2, 3, 4, 5]
+}

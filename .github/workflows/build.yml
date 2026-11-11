@@ -1,0 +1,111 @@
+name: Build downloads
+
+on:
+  push:
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: downloads-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
+jobs:
+  build:
+    runs-on: windows-2025
+    timeout-minutes: 120
+    env:
+      PYTHONUTF8: '1'
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+          architecture: x64
+          cache: pip
+          cache-dependency-path: tools/studio/requirements*.txt
+      - name: Install build dependencies
+        run: python -m pip install -r tools/studio/requirements-build.txt
+      - name: Cache verified compilers and native conversion tools
+        uses: actions/cache@v4
+        with:
+          path: |
+            out/toolchains
+            out/downloads/apple-tools
+            out/apple-tools
+            out/downloads/conversion-tools
+            out/conversion-tools
+          key: windows-x64-tools-${{ hashFiles('config/toolchain.toml', 'config/apple-tools.json', 'config/inno-setup.json', 'config/conversion-tools.json', 'tools/studio/apple_tools.py', 'tools/studio/conversion_tools.py', 'tools/studio/toolchain_setup.py', 'tools/studio/inno_setup.py', 'tools/apple/managed_*') }}
+      - name: Set up and check the pinned toolchain
+        run: |
+          python linnet setup
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python linnet doctor
+      - name: Compile Python sources
+        run: python -m compileall -q tools
+      - name: Build and verify all firmware bundles
+        run: |
+          $targets = [ordered]@{
+            'photo4g-p98' = 'photo4g'
+            'video5g-m25' = 'video5g'
+            'ipod4g-q21' = 'ipod4g'
+            'classic6g-n25' = 'classic6g-7g'
+          }
+          foreach ($target in $targets.Keys) {
+            $downloadTarget = $targets[$target]
+            foreach ($build in @('user', 'dev')) {
+              python linnet release bundle --target $target --build $build --jobs 4 --output "out/releases/linnet-$downloadTarget-$build.zip"
+              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            }
+          }
+      - name: Package Windows Media Manager
+        run: python linnet release media --output out/releases/linnet-media-windows.zip --installer-output out/releases/LinnetSetup.exe
+      - name: Include matching source and release instructions
+        run: |
+          git archive --format=zip --prefix=linnet/ --output=out/releases/linnet-source.zip HEAD
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Copy-Item docs/releases.md out/releases/RELEASE-README.md
+          $checksums = Get-ChildItem out/releases -File | Sort-Object Name | ForEach-Object {
+            $digest = (Get-FileHash -Algorithm SHA256 -LiteralPath $_.FullName).Hash.ToLowerInvariant()
+            "$digest  $($_.Name)"
+          }
+          $checksums | Set-Content out/releases/SHA256SUMS.txt -Encoding utf8NoBOM
+      - name: Save downloadable build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linnet-downloads
+          path: out/releases/*
+          if-no-files-found: error
+          retention-days: 14
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: linnet-downloads
+          path: downloads
+      - name: Prepare draft release with all downloads
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          if gh release view "$RELEASE_TAG" --json isDraft > release.json; then
+            python3 -c 'import json; assert json.load(open("release.json"))["isDraft"], "Refusing to replace a published release"'
+            gh release upload "$RELEASE_TAG" downloads/* --clobber
+          else
+            gh release create "$RELEASE_TAG" downloads/* --verify-tag --draft \
+              --title "Linnet $RELEASE_TAG" --notes-file downloads/RELEASE-README.md
+          fi

@@ -1,0 +1,78 @@
+id = "ipod4g-q21"
+name = "Linnet for iPod 4G Monochrome"
+aliases = ["ipod4g", "ipod-4g", "ipod4g-gray", "mp102", "q21", "pe435a", "a1059"]
+image_target = 8
+board_id = "q21"
+model_alias = "mp102"
+soc = "pp5020"
+idle_clock_hz = 30000000
+hal_family = "pp502x"
+cpu = "arm7tdmi"
+architecture = "armv4t"
+endianness = "little"
+sdram_bytes = 33554432
+os_capacity_bytes = 8388608
+resident_limit_bytes = 5505024
+stage_address = 16777216
+stage_bytes = 8388608
+recovery_snapshot_address = 31457280
+recovery_snapshot_bytes = 1048576
+storage_max_read_sectors = 192
+lcd_width = 160
+lcd_height = 128
+lcd_format = "gray2-horizontal"
+presentation_policy = { music_hint_menu_back = true }
+capabilities = { photos = false, video = false, themes = true, cover_flow = false }
+media_photo_width = 160
+media_photo_height = 108
+media_video_width = 160
+media_video_height = 128
+media_video_fps = 12
+media_video_color = "gray4"
+media_video_backend = "none"
+media_art_side = 64
+media_video_extensions = [".ipvf"]
+cop_display = false
+runtime_policy = { resident_monitor = true, music_browse_index = true }
+entry_address = 0
+load_address = 0
+mailbox_address = 33550336
+mailbox_bytes = 4096
+
+[ui]
+allowed_themes = ["linnet.theme.ipod4g-mono"]
+default_theme = "linnet.theme.ipod4g-mono"
+
+[retail]
+usb_vid = 1452
+usb_pid = 4611
+board_names = ["iPod Q21"]
+model_numbers = ["PE435A", "M9282"]
+regulatory_models = ["MP102", "A1059"]
+regulatory_model_by_model = { PE435A = "MP102", M9282 = "A1059" }
+firmware_signature = { offset = 32, ascii = "portalplayer" }
+
+[native_storage]
+usb_vid = 4617
+usb_pid = 20557
+model = "LINNET IPOD 4G USB Device"
+friendly_name = "LINNET IPOD 4G"
+sector_bytes = [512, 4096]
+
+[installer]
+enabled = true
+boot_layout = "ipod-directory"
+file_loader = ".rockbox/rockbox.ipod"
+wrapper_model = "ip4g"
+wrapper_checksum_seed = 8
+firmware_header_magic = "5d69685b"
+firmware_header_field = 3
+firmware_partition_types = [0]
+media_partition_types = [6, 11, 12, 14]
+firmware_entry_type = "soso"
+max_firmware_bytes = 268435456
+
+[resources]
+music_titles_address = 32636928
+music_titles_bytes = 851968
+coverflow_catalog_slots = 2048

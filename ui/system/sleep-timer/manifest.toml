@@ -1,0 +1,5 @@
+[app]
+id = "linnet.system.sleep-timer"
+title = "Sleep Timer"
+entry = "screen.tsx"
+capabilities = ["ui"]

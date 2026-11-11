@@ -1,0 +1,16 @@
+hal/s5l8702/irq.c
+hal/s5l8702/irq.S
+hal/s5l8702/timer.c
+hal/s5l8702/clicker.c
+hal/s5l8702/watchdog.c
+hal/s5l8702/aes.c
+hal/s5l8702/disk_mode.c
+hal/s5l8702/pcm_dma.c
+hal/s5l8702/i2c.c
+hal/s5l8702/clock_resources.c
+hal/s5l8702/headset_remote.c
+hal/s5l8702/ata_pio.c
+hal/s5l8702/lcd_bus.c
+hal/arm926/cache.c
+hal/arm926/mmu.c
+hal/pmu/pcf50635.c

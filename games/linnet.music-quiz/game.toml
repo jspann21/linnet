@@ -1,0 +1,15 @@
+[game]
+id = "linnet.music-quiz"
+title = "Music Quiz"
+description = "Name songs from your own music library."
+author = "Linnet"
+license = "GPL-3.0-or-later"
+version = 1
+schema = 1
+targets = ["photo4g-p98", "video5g-m25", "classic6g-n25"]
+capabilities = ["music"]
+stack_bytes = 8192
+
+[build]
+sources = ["src/game.c"]
+builtin = 5

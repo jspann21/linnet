@@ -1,0 +1,29 @@
+[theme]
+id = "linnet.theme.aurora"
+name = "Aurora"
+style = "standard"
+layout = "aurora"
+font = "../../../../../sdk/assets/font-sans14.json"
+font_license = "../../../../../sdk/assets/FONT-LICENSE.txt"
+
+[colors]
+foreground = "#e6fff5"
+background = "#092d31"
+accent = "#78e3ba"
+muted = "#9dc9c1"
+panel = "#15464a"
+selection_fg = "#092d31"
+selection_bg = "#78e3ba"
+status_fg = "#e6fff5"
+status_bg = "#15464a"
+border = "#528c86"
+artwork_bg = "#15464a"
+artwork_fg = "#78e3ba"
+
+[metrics]
+row_height = 28
+padding = 8
+
+[assets]
+music = "../../../../../themes/default/music.ppm"
+artwork = "../../../../../themes/default/artwork.ppm"

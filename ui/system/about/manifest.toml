@@ -1,0 +1,8 @@
+[app]
+id = "linnet.system.about"
+title = "About"
+entry = "screen.tsx"
+capabilities = ["ui", "canvas"]
+
+[canvas]
+emblem = { source = "emblem.c", symbol = "ln_about_emblem" }

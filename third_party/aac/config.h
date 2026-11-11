@@ -1,0 +1,13 @@
+#ifndef LINNET_AAC_CONFIG_H
+#define LINNET_AAC_CONFIG_H
+#define CONFIG_CPU 5020
+#define CODEC_SIZE 0x40000
+#define ROCKBOX_LITTLE_ENDIAN 1
+#define MEM_ALIGN_ATTR __attribute__((aligned(4)))
+#define ICODE_ATTR
+#define ICONST_ATTR
+#define IBSS_ATTR
+#define ICONST_ATTR_TREMOR_WINDOW
+#define ICONST_ATTR_TREMOR_MDCT
+#define ICODE_ATTR_TREMOR_MDCT
+#endif

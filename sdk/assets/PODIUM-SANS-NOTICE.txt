@@ -1,0 +1,26 @@
+Podium Sans — optional font extracted locally from Apple firmware
+
+Source: original iPod Photo firmware 1.2.1.
+SHA256: 9321189b846a7317f4f575075696056e9a18c79644886a00055a402259c6fadc
+Font header offset: 0x467c94; Unicode group header: 0x46783c.
+Strike: 16; bitmap height: 17; bit depth: 4.
+
+Apple font data is not included in the repository or public packages.
+Media Manager can download the original firmware directly from Apple, verify
+its SHA-256, and extract printable ASCII 32–126 locally. Original advances
+and bitmap samples are preserved, expanding 4-bit coverage to 8-bit alpha.
+A common one-pixel origin accommodates negative left bearings. No glyphs
+are resized. Glyph ink rectangles are packed without loss in PODIUM.FNT.
+
+Source download:
+https://secure-appldnld.apple.com/iPod/SBML/osx/bundles/061-2693.20060912.PdwCD/iPod_5.1.2.1.ipsw
+Archive SHA256: 03643928fd4b5d180f92396382680c48e745826b8b170bf2e298bef2bbe26464
+Extractor: tools/content/apple_font.py
+Apple terms: https://www.apple.com/legal/sla/docs/ipod.pdf
+Resource fields were inspected using iPodWizard's Font.h and Font.cpp:
+https://github.com/DavidBuchanan314/iPodWizard-mirror
+
+The glyphs retain Apple's ownership. No redistribution permission is claimed.
+Extraction and reuse remain subject to applicable Apple terms and law. Keep
+locally extracted data and Apple firmware out of shared source and packages.
+The glyphs are not covered by the DejaVu or Linnet source-code licenses.

@@ -1,0 +1,26 @@
+name: iPod compatibility or installation
+description: Get help identifying an iPod, installing Linnet, or reporting a hardware problem.
+title: "[Hardware] iPod compatibility or installation"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        In Media Manager, open **iPod setup → Save hardware report…**.
+        Save or copy the report, then attach or paste it below.
+
+        Reports contain hardware details, excluding serial numbers, usernames,
+        local paths and media. This issue and attachments are public and show your account.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Include the error message and any storage changes.
+    validations:
+      required: true
+  - type: textarea
+    id: hardware-report
+    attributes:
+      label: Hardware report
+      description: Attach or paste the report. If collection failed, describe the error.
+    validations:
+      required: true

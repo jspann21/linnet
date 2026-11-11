@@ -1,0 +1,15 @@
+out/
+__pycache__/
+*.pyc
+.venv/
+.codex-remote-attachments/
+.ruff_cache/
+.pytest_cache/
+.mypy_cache/
+.env
+.env.*
+!.env.example
+PODIUM.FNT
+iPod_5.1.2.1.ipsw
+*.[iI][pP][vV][fF]
+*.[iI][pP][vV]
