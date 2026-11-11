@@ -1,0 +1,7 @@
+[app]
+id = "linnet.system.game-play"
+title = "Game"
+entry = "screen.tsx"
+capabilities = ["ui", "canvas"]
+[canvas]
+draw = { source = "../../../services/games/manager.c", symbol = "ln_games_draw", link = true }

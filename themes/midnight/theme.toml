@@ -1,0 +1,18 @@
+[theme]
+id = "local.example.midnight"
+font = "../../sdk/assets/font-compact13.json"
+
+[colors]
+foreground = "#e4e8f0"
+background = "#121c2c"
+accent = "#8cb8ff"
+muted = "#92a4bc"
+panel = "#243650"
+
+[metrics]
+row_height = 22
+padding = 4
+
+[assets]
+music = "../default/music.ppm"
+artwork = "../default/artwork.ppm"

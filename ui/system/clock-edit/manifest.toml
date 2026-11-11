@@ -1,0 +1,5 @@
+[app]
+id = "linnet.system.clock-edit"
+title = "Set date and time"
+entry = "screen.tsx"
+capabilities = ["ui"]

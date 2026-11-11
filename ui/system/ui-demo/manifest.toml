@@ -1,0 +1,8 @@
+[app]
+id = "linnet.system.ui-demo"
+title = "UI Demo"
+entry = "screen.tsx"
+capabilities = ["ui", "canvas"]
+
+[canvas]
+waveform = { source = "canvas.c", symbol = "ln_ui_demo_waveform" }

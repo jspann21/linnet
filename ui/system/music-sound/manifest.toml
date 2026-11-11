@@ -1,0 +1,5 @@
+[app]
+id = "linnet.system.music-sound"
+title = "Sound settings"
+entry = "screen.tsx"
+capabilities = ["ui"]

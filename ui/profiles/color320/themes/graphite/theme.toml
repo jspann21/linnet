@@ -1,0 +1,29 @@
+[theme]
+id = "linnet.theme.graphite"
+name = "Graphite"
+style = "standard"
+layout = "graphite"
+font = "../../../../../sdk/assets/font-sans14.json"
+font_license = "../../../../../sdk/assets/FONT-LICENSE.txt"
+
+[colors]
+foreground = "#f4f0e9"
+background = "#202225"
+accent = "#d7b981"
+muted = "#b8b5af"
+panel = "#323539"
+selection_fg = "#202225"
+selection_bg = "#d7b981"
+status_fg = "#f4f0e9"
+status_bg = "#323539"
+border = "#858583"
+artwork_bg = "#323539"
+artwork_fg = "#d7b981"
+
+[metrics]
+row_height = 28
+padding = 8
+
+[assets]
+music = "../../../../../themes/default/music.ppm"
+artwork = "../../../../../themes/default/artwork.ppm"

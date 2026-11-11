@@ -1,0 +1,28 @@
+{
+  "ffmpeg": {
+    "version": "9.0.2",
+    "directory": "ffmpeg-9.0.2",
+    "url": "https://ffmpeg.org/releases/ffmpeg-9.0.2.tar.xz",
+    "bytes": 12040788,
+    "sha256": "8c3850283eb25fa026482078a04051e0be17347b09ef81a0849bec15a96e002e"
+  },
+  "x264": {
+    "version": "b35605ace3ddf7c1a5d67a2eb553f034aef41d55",
+    "directory": "x264-b35605ace3ddf7c1a5d67a2eb553f034aef41d55",
+    "url": "https://code.videolan.org/videolan/x264/-/archive/b35605ace3ddf7c1a5d67a2eb553f034aef41d55/x264-b35605ace3ddf7c1a5d67a2eb553f034aef41d55.tar.bz2",
+    "bytes": 848719,
+    "sha256": "6eeb82934e69fd51e043bd8c5b0d152839638d1ce7aa4eea65a3fedcf83ff224"
+  },
+  "nasm": {
+    "directory": "nasm-3.01",
+    "url": "https://www.nasm.us/pub/nasm/releasebuilds/3.01/win64/nasm-3.01-win64.zip",
+    "bytes": 594502,
+    "sha256": "e0ba5157007abc7b1a65118a96657a961ddf55f7e3f632ee035366dfce039ca4"
+  },
+  "pkgconf": {
+    "directory": "pkgconf/ucrt64/bin",
+    "url": "https://mirror.msys2.org/mingw/ucrt64/mingw-w64-ucrt-x86_64-pkgconf-1~3.0.10-1-any.pkg.tar.zst",
+    "bytes": 149203,
+    "sha256": "c234b9f8280f1e931efe8e4350085f544e4a6081ffcbd2caa3e81834e72e4688"
+  }
+}

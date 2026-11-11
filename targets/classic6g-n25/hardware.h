@@ -1,0 +1,10 @@
+#pragma once
+#define LINNET_BOOT_HASH_IRAM 0
+#define LINNET_HARDWARE_CLICKER 1
+#define LINNET_MUSIC_METADATA_BYTES (512u * 1024u)
+#define LINNET_DISPLAY_SERVICE_PAIRS 256u
+#define LINNET_VIDEO_CLOCK_HZ 216000000u
+/* OS workload policy is implemented by this target's runtime_power.c. */
+#define LINNET_RUNTIME_POWER_POLICY 1
+#define LINNET_IDLE_POLL_MAX_US 20000u
+#define LINNET_AUDIO_CLOCK_GATING 1

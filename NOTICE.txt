@@ -1,0 +1,24 @@
+Linnet - Warranty and liability notice
+
+Linnet's firmware, bootloader, Media Manager, installers, development tools,
+and documentation are provided as is, without warranty of any kind, express
+or implied, including warranties of merchantability or fitness for a
+particular purpose. You install, update, remove, modify, and use Linnet at
+your own risk.
+
+Except as required by applicable law or agreed in writing, the copyright
+holders and contributors are not liable for claims, losses, costs, or damages
+arising from the software or its installation, use, or removal. This includes
+damage to iPods, computers, storage, or other devices; devices becoming
+unusable; lost or corrupted data; interrupted operation; and repair,
+replacement, or recovery costs, even if advised that such damage is possible.
+
+Keep independent backups of your data and the original firmware recovery
+files before changing your device.
+
+This notice explains the warranty disclaimer and limitation of liability in
+sections 15 and 16 of the GNU General Public License, version 3. It does not
+change the software's license or limit rights or liabilities that applicable
+law does not allow to be excluded. See LICENSE (LICENSE.txt in firmware ZIPs)
+for the complete license. Third-party components retain their own licenses
+and notices.

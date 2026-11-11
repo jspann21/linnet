@@ -1,0 +1,13 @@
+{
+  "target_id": "photo4g-p98",
+  "healthy_cycles": 20,
+  "required_invariants": [
+    "healthy-image-identity-after-reenumeration",
+    "failure-before-healthy-returns-to-loader",
+    "failure-after-healthy-returns-to-loader",
+    "crash-record-matches-failed-build",
+    "no-ambiguous-command-replay",
+    "reboot-os-boot-disk",
+    "release-development-exclusion"
+  ]
+}

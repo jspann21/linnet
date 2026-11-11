@@ -1,0 +1,15 @@
+[game]
+id = "linnet.snake"
+title = "Snake"
+description = "Turn, boost, and grow through a polished grid."
+author = "Linnet"
+license = "GPL-3.0-or-later"
+version = 1
+schema = 1
+targets = ["photo4g-p98", "video5g-m25", "classic6g-n25"]
+capabilities = []
+stack_bytes = 8192
+
+[build]
+sources = ["src/game.c"]
+builtin = 10

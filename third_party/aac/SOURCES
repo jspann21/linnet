@@ -1,0 +1,14 @@
+faad/common.c
+faad/decoder.c
+faad/drc.c
+faad/error.c
+faad/filtbank.c
+faad/huffman.c
+faad/mp4.c
+faad/pns.c
+faad/specrec.c
+faad/syntax.c
+faad/tns.c
+lib/fft-ffmpeg.c
+lib/mdct.c
+lib/mdct_lookup.c

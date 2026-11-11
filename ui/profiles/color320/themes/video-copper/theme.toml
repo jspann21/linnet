@@ -1,0 +1,32 @@
+[theme]
+id = "linnet.theme.video-copper"
+name = "Video Copper"
+style = "standard"
+layout = "native"
+font = "../../../../../sdk/assets/font-sans14.json"
+font_license = "../../../../../sdk/assets/FONT-LICENSE.txt"
+
+font_source = "apple-podium-sans16"
+
+[colors]
+foreground = "#332820"
+background = "#fff8ed"
+accent = "#ab542e"
+muted = "#816e5f"
+panel = "#f3e5d2"
+selection_fg = "#fff8ed"
+selection_bg = "#ab542e"
+status_fg = "#332820"
+status_bg = "#f3e5d2"
+border = "#c7ab91"
+artwork_bg = "#f3e5d2"
+artwork_fg = "#ab542e"
+battery = "#67864a"
+
+[metrics]
+row_height = 28
+padding = 12
+
+[assets]
+music = "../../../../../themes/default/music.ppm"
+artwork = "../../../../../themes/default/artwork.ppm"

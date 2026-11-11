@@ -1,0 +1,32 @@
+[theme]
+id = "linnet.theme.video-paper"
+name = "Video Paper"
+style = "standard"
+layout = "native"
+font = "../../../../../sdk/assets/font-sans14.json"
+font_license = "../../../../../sdk/assets/FONT-LICENSE.txt"
+
+font_source = "apple-podium-sans16"
+
+[colors]
+foreground = "#000000"
+background = "#ffffff"
+accent = "#1468ad"
+muted = "#626971"
+panel = "#edf2f6"
+selection_fg = "#ffffff"
+selection_bg = "#1468ad"
+status_fg = "#000000"
+status_bg = "#edf2f6"
+border = "#999999"
+artwork_bg = "#edf0f4"
+artwork_fg = "#1468ad"
+battery = "#338554"
+
+[metrics]
+row_height = 28
+padding = 12
+
+[assets]
+music = "../../../../../themes/default/music.ppm"
+artwork = "../../../../../themes/default/artwork.ppm"

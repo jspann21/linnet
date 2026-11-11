@@ -1,0 +1,29 @@
+[theme]
+id = "linnet.theme.sunset"
+name = "Sunset"
+style = "standard"
+layout = "sunset"
+font = "../../../../../sdk/assets/font-sans14.json"
+font_license = "../../../../../sdk/assets/FONT-LICENSE.txt"
+
+[colors]
+foreground = "#482d28"
+background = "#fff4e6"
+accent = "#a74932"
+muted = "#846255"
+panel = "#efd4bf"
+selection_fg = "#fff9ef"
+selection_bg = "#a74932"
+status_fg = "#482d28"
+status_bg = "#efd4bf"
+border = "#ba8a71"
+artwork_bg = "#efd4bf"
+artwork_fg = "#a74932"
+
+[metrics]
+row_height = 28
+padding = 8
+
+[assets]
+music = "../../../../../themes/default/music.ppm"
+artwork = "../../../../../themes/default/artwork.ppm"

@@ -1,0 +1,27 @@
+[theme]
+id = "linnet.theme.album-colors"
+name = "Album Colors"
+style = "album-art"
+layout = "default"
+font = "../../../../../sdk/assets/font-sans14.json"
+font_license = "../../../../../sdk/assets/FONT-LICENSE.txt"
+
+[colors]
+foreground = "#eeeeee"
+background = "#181818"
+accent = "#bbbbbb"
+muted = "#c0c0c0"
+panel = "#282828"
+selection_fg = "#181818"
+selection_bg = "#bbbbbb"
+status_fg = "#eeeeee"
+status_bg = "#282828"
+border = "#777777"
+
+[metrics]
+row_height = 28
+padding = 6
+
+[assets]
+music = "../../../../../themes/default/music.ppm"
+artwork = "../../../../../themes/default/artwork.ppm"

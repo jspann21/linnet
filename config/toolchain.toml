@@ -1,0 +1,11 @@
+[toolchain]
+compiler = "clang"
+version = "23.1.2"
+target = "arm-none-eabi"
+cpu = "arm7tdmi"
+linker = "ld.lld"
+objcopy = "llvm-objcopy"
+nm = "llvm-nm"
+windows_archive = "llvm-mingw-20260922-ucrt-x86_64"
+windows_url = "https://github.com/mstorsjo/llvm-mingw/releases/download/20260922/llvm-mingw-20260922-ucrt-x86_64.zip"
+windows_sha256 = "e3ad77d117a4bea19a7a3b333341824d79a5a371004a10e25b8504e7b3047666"

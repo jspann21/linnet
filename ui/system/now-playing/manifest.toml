@@ -1,0 +1,5 @@
+[app]
+id = "linnet.system.now-playing"
+title = "Now Playing"
+entry = "screen.tsx"
+capabilities = ["ui"]

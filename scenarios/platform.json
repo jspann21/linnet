@@ -1,0 +1,7 @@
+{
+  "target_id": "photo4g-p98",
+  "navigation_events": 256,
+  "animation_frames": 40,
+  "idle_observe_ms": 500,
+  "sleep_ms": 250
+}

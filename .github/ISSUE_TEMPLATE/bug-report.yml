@@ -1,0 +1,29 @@
+name: Bug report
+description: Report a problem with Linnet firmware, Media Manager or development tools.
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Describe the problem and what you expected to happen. Include any error message.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: List the steps that lead to the problem.
+    validations:
+      required: true
+  - type: textarea
+    id: setup
+    attributes:
+      label: Version and setup
+      description: Include the Linnet version and User or Developer build type. For firmware issues, include the iPod model and storage configuration. For desktop issues, include the Media Manager version and operating system.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Logs or screenshots
+      description: Add relevant details if available. Remove serial numbers, usernames, personal paths and other private information before posting.

@@ -1,0 +1,5 @@
+[app]
+id = "linnet.system.shutdown"
+title = "Auto Shutdown"
+entry = "screen.tsx"
+capabilities = ["ui"]

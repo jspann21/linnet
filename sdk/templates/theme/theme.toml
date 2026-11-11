@@ -1,0 +1,21 @@
+[theme]
+id = "local.example.starter-theme"
+font = "../../sdk/assets/font.json"
+font_license = "../../sdk/assets/FONT-LICENSE.txt"
+
+[colors]
+foreground = "#203840"
+background = "#f0f8f4"
+accent = "#167058"
+muted = "#587068"
+panel = "#d8e8e0"
+
+[metrics]
+row_height = 22
+padding = 4
+
+# Paths are relative to themes/starter/theme.toml after copying.
+# These shared resources are required by the existing system scenes.
+[assets]
+music = "../default/music.ppm"
+artwork = "../default/artwork.ppm"

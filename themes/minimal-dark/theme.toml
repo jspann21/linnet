@@ -1,0 +1,26 @@
+[theme]
+id = "linnet.theme.minimal-dark"
+name = "Minimal Dark"
+layout = "minimal"
+font = "../../sdk/assets/font-compact13.json"
+
+[colors]
+foreground = "#ffffff"
+background = "#171717"
+accent = "#ffffff"
+muted = "#aaaaaa"
+panel = "#383838"
+selection_fg = "#171717"
+selection_bg = "#ffffff"
+status_fg = "#ffffff"
+status_bg = "#171717"
+border = "#383838"
+battery = "#ffffff"
+
+[metrics]
+row_height = 22
+padding = 4
+
+[assets]
+music = "../default/music.ppm"
+artwork = "../default/artwork.ppm"

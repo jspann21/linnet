@@ -1,0 +1,32 @@
+[theme]
+id = "linnet.theme.video-night"
+name = "Video Night"
+style = "standard"
+layout = "native"
+font = "../../../../../sdk/assets/font-sans14.json"
+font_license = "../../../../../sdk/assets/FONT-LICENSE.txt"
+
+font_source = "apple-podium-sans16"
+
+[colors]
+foreground = "#eaf1fa"
+background = "#101926"
+accent = "#78bce8"
+muted = "#94a8bd"
+panel = "#1b2939"
+selection_fg = "#101926"
+selection_bg = "#78bce8"
+status_fg = "#eaf1fa"
+status_bg = "#1b2939"
+border = "#30465c"
+artwork_bg = "#1b2939"
+artwork_fg = "#78bce8"
+battery = "#84d5aa"
+
+[metrics]
+row_height = 28
+padding = 12
+
+[assets]
+music = "../../../../../themes/default/music.ppm"
+artwork = "../../../../../themes/default/artwork.ppm"

@@ -1,0 +1,33 @@
+[theme]
+id = "linnet.theme.classic-split"
+name = "Classic Split"
+style = "apple-classic"
+layout = "classic-split"
+targets = ["photo4g-p98"]
+font = "../../../../sdk/assets/font-sans14.json"
+font_license = "../../../../sdk/assets/FONT-LICENSE.txt"
+
+font_source = "apple-podium-sans16"
+
+[colors]
+foreground = "#151515"
+background = "#ffffff"
+accent = "#2f73cf"
+muted = "#666666"
+panel = "#d8d8d8"
+selection_fg = "#ffffff"
+selection_bg = "#2f73cf"
+status_fg = "#111111"
+status_bg = "#d8d8d8"
+border = "#8f8f8f"
+artwork_bg = "#edf0f4"
+artwork_fg = "#2f73cf"
+battery = "#70ad38"
+
+[metrics]
+row_height = 22
+padding = 6
+
+[assets]
+music = "../../../../themes/default/music.ppm"
+artwork = "../../../../themes/default/artwork.ppm"

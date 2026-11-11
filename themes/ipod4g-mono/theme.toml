@@ -1,0 +1,30 @@
+[theme]
+id = "linnet.theme.ipod4g-mono"
+name = "iPod Mono"
+style = "monochrome"
+layout = "default"
+targets = ["ipod4g-q21"]
+font = "../../sdk/assets/font-q21-mono13.json"
+font_license = "../../sdk/assets/FONT-LICENSE.txt"
+
+[colors]
+foreground = "#000000"
+background = "#ffffff"
+accent = "#000000"
+muted = "#000000"
+panel = "#ffffff"
+selection_fg = "#ffffff"
+selection_bg = "#000000"
+status_fg = "#000000"
+status_bg = "#ffffff"
+border = "#000000"
+artwork_bg = "#ffffff"
+artwork_fg = "#000000"
+battery = "#000000"
+
+[metrics]
+row_height = 18
+padding = 5
+
+[assets]
+artwork = "../default/artwork.ppm"

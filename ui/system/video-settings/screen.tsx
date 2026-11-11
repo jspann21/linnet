@@ -1,0 +1,2 @@
+import { Screen, StatusBar, VirtualList, Scrollbar, Text } from "@linnet/ui";
+export default function Scene() { return (<Screen><StatusBar w={220} h={20} text="Video Settings" bg="theme.panel" /><VirtualList x={4} y={24} w={198} h={130} count={4} text="Video setting" focus={true} /><Scrollbar x={207} y={24} w={7} h={130} count={4} fg="theme.accent" /><Text x={4} y={157} w={210} h={16} text="Prev / Next to adjust" fg="theme.muted" /></Screen>); }

@@ -1,0 +1,85 @@
+{
+  "libgpod": {
+    "url": "https://deb.debian.org/debian/pool/main/libg/libgpod/libgpod_0.8.3.orig.tar.bz2",
+    "sha256": "638a7959d04e95f1e62abad02bd33702e4e8dfef98485ac7d9d50395c37e955d"
+  },
+  "packages": [
+    {
+      "name": "glib2",
+      "url": "https://mirror.msys2.org/mingw/ucrt64/mingw-w64-ucrt-x86_64-glib2-2.90.0-1-any.pkg.tar.zst",
+      "sha256": "877259a47d98b73473c5ea0729ad8297ca31a545c41de2b372e726ebed314b1c",
+      "source_url": "https://mirror.msys2.org/mingw/sources/mingw-w64-glib2-2.90.0-1.src.tar.zst",
+      "source_sha256": "580246fb9db6083e0191ac7fd0e44af71df6ec0dc52cfd384b5ae07f8665cc9e"
+    },
+    {
+      "name": "gdk-pixbuf2",
+      "url": "https://mirror.msys2.org/mingw/ucrt64/mingw-w64-ucrt-x86_64-gdk-pixbuf2-2.44.7-1-any.pkg.tar.zst",
+      "sha256": "f92737466c91d258d1f29e01d67bc278a8795fedb2c36ff76003d66982e84554",
+      "source_url": "https://mirror.msys2.org/mingw/sources/mingw-w64-gdk-pixbuf2-2.44.7-1.src.tar.zst",
+      "source_sha256": "34986b21db1b40021a37835e90dad04250d1e31dc90da538b9922acd097e0019"
+    },
+    {
+      "name": "libxml2",
+      "url": "https://mirror.msys2.org/mingw/ucrt64/mingw-w64-ucrt-x86_64-libxml2-2.15.4-1-any.pkg.tar.zst",
+      "sha256": "ea6b8e7ee24d8674e719f1f0a1b3747a72158ab786dfc5392ccb9f8edd09582a",
+      "source_url": "https://mirror.msys2.org/mingw/sources/mingw-w64-libxml2-2.15.4-1.src.tar.zst",
+      "source_sha256": "e283bdd176377f82c3af57458d8623afedbba6d504d4480f93f49e39fb0a1417"
+    },
+    {
+      "name": "libplist",
+      "url": "https://mirror.msys2.org/mingw/ucrt64/mingw-w64-ucrt-x86_64-libplist-2.7.0-4-any.pkg.tar.zst",
+      "sha256": "665607c34dbf923ebb820d78b376db59de4d2d3874a45d70f24f51eb1d64f127",
+      "source_url": "https://mirror.msys2.org/mingw/sources/mingw-w64-libplist-2.7.0-4.src.tar.zst",
+      "source_sha256": "0170254ac2a3e4fa0c88ec974a4e6d6a1e1b91d3da14d91b9b147a336c09a015"
+    },
+    {
+      "name": "sqlite3",
+      "url": "https://mirror.msys2.org/mingw/ucrt64/mingw-w64-ucrt-x86_64-sqlite3-3.53.4-1-any.pkg.tar.zst",
+      "sha256": "a8f904acb136634b4f708e8a0f9f301f76a3c42eea387a51300af961d0066051",
+      "source_url": "https://mirror.msys2.org/mingw/sources/mingw-w64-sqlite3-3.53.4-1.src.tar.zst",
+      "source_sha256": "5a17b78262ceecda3d333942ea2e74f06f7b102d28bf22e77d3a81fb6116cee4"
+    },
+    {
+      "name": "zlib",
+      "url": "https://mirror.msys2.org/mingw/ucrt64/mingw-w64-ucrt-x86_64-zlib-1.3.2-2-any.pkg.tar.zst",
+      "sha256": "841401182976d2f9e17e5c0ebaac51f2a8014140ea53d67625e91c8fb3c85ea0",
+      "source_url": "https://mirror.msys2.org/mingw/sources/mingw-w64-zlib-1.3.2-2.src.tar.zst",
+      "source_sha256": "eef69dea52357e01b272d6fd6dc4d7c0773f71260cb7bcde6047c8c383518db3"
+    },
+    {
+      "name": "gettext-runtime",
+      "url": "https://mirror.msys2.org/mingw/ucrt64/mingw-w64-ucrt-x86_64-gettext-runtime-1.0-1-any.pkg.tar.zst",
+      "sha256": "ba693dda4ac375af76ce481ff3a6e7481286546cc7dc6d56c7021dae34084157",
+      "source_url": "https://mirror.msys2.org/mingw/sources/mingw-w64-gettext-1.0-1.src.tar.zst",
+      "source_sha256": "cca0d0c8f60353faccc5ad40405240014e4a7ccc8b1c6ca9f4626aef3097d26e"
+    },
+    {
+      "name": "libiconv",
+      "url": "https://mirror.msys2.org/mingw/ucrt64/mingw-w64-ucrt-x86_64-libiconv-1.19-1-any.pkg.tar.zst",
+      "sha256": "9a500f38c2b91808741c62fae746b3e9110b33a1ecf5c30fa0c66dbedddf7e16",
+      "source_url": "https://mirror.msys2.org/mingw/sources/mingw-w64-libiconv-1.19-1.src.tar.zst",
+      "source_sha256": "74428280c17094da5b702c29b2e1a0abae59556ea5dfdd65705cc8ccc1e000fb"
+    },
+    {
+      "name": "libffi",
+      "url": "https://mirror.msys2.org/mingw/ucrt64/mingw-w64-ucrt-x86_64-libffi-3.8.0-1-any.pkg.tar.zst",
+      "sha256": "99ad12f4ecfa00a889ef9c5c0188592368a5bac109d0c508ce4e04f29ea95a76",
+      "source_url": "https://mirror.msys2.org/mingw/sources/mingw-w64-libffi-3.8.0-1.src.tar.zst",
+      "source_sha256": "641ea78ce0333839eab5262656f03fdcfd8496d7388bd7b27e4f0638aeed9adf"
+    },
+    {
+      "name": "pcre2",
+      "url": "https://mirror.msys2.org/mingw/ucrt64/mingw-w64-ucrt-x86_64-pcre2-10.48-3-any.pkg.tar.zst",
+      "sha256": "f1aae310be1c65ec0e2265d283ba01fcf322208bc19c96cfa52801fcc1c11746",
+      "source_url": "https://mirror.msys2.org/mingw/sources/mingw-w64-pcre2-10.48-3.src.tar.zst",
+      "source_sha256": "2d97640064e42c2d800580dc2e622487b6a2d980722380cdab5f5f71d311f39a"
+    },
+    {
+      "name": "libpng",
+      "url": "https://mirror.msys2.org/mingw/ucrt64/mingw-w64-ucrt-x86_64-libpng-1.6.58-1-any.pkg.tar.zst",
+      "sha256": "bbfb6eb6246b01df90d82d6cff84f0a4e98dad029a4a2753898c96fcaadb66c7",
+      "source_url": "https://mirror.msys2.org/mingw/sources/mingw-w64-libpng-1.6.58-1.src.tar.zst",
+      "source_sha256": "9e985fc4cef509ec689f982dc6a948e9a8ee5184db25d65e9dd4c21872092348"
+    }
+  ]
+}

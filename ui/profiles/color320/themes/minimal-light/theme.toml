@@ -1,0 +1,28 @@
+[theme]
+id = "linnet.theme.minimal-light"
+name = "Minimal Light"
+style = "standard"
+layout = "minimal"
+font = "../../../../../sdk/assets/font-sans14.json"
+font_license = "../../../../../sdk/assets/FONT-LICENSE.txt"
+
+[colors]
+foreground = "#171717"
+background = "#ffffff"
+accent = "#171717"
+muted = "#666666"
+panel = "#dedede"
+selection_fg = "#ffffff"
+selection_bg = "#171717"
+status_fg = "#171717"
+status_bg = "#ffffff"
+border = "#dedede"
+battery = "#171717"
+
+[metrics]
+row_height = 28
+padding = 6
+
+[assets]
+music = "../../../../../themes/default/music.ppm"
+artwork = "../../../../../themes/default/artwork.ppm"

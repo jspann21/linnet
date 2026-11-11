@@ -1,0 +1,101 @@
+id = "classic6g-n25"
+name = "Linnet for iPod Classic"
+aliases = ["classic6g", "classic7g", "classic65g", "ipod-classic", "a1238", "n25"]
+image_target = 1238
+board_id = "n25"
+model_alias = "a1238"
+soc = "s5l8702"
+audio_codec = "cs42l55"
+hal_family = "s5l8702"
+cpu = "arm926ej-s"
+active_clock_hz = 108000000
+architecture = "armv5te"
+endianness = "little"
+# Native Boot and OS use the verified 64 MiB SDRAM layout.
+# Hardware reference: https://github.com/Rockbox/rockbox/blob/master/firmware/export/config/ipod6g.h
+# Boot chain: https://github.com/giek2000/ipod-classic-firmware-research/blob/main/architecture/BOOT_CHAIN.md
+sdram_address = 134217728
+sdram_bytes = 67108864
+build_enabled = true
+boot_size_optimization = true
+bringup_blocker = "Use iPod setup in Media Manager for Classic Boot and OS installation. Existing Boot installations should reconnect in Linnet Disk Mode."
+os_capacity_bytes = 8388608
+resident_limit_bytes = 8388608
+stage_address = 150994944
+stage_bytes = 8388608
+recovery_snapshot_address = 197132288
+recovery_snapshot_bytes = 1048576
+storage_max_read_sectors = 384
+presentation_profile = "color320"
+lcd_width = 320
+lcd_height = 240
+lcd_format = "rgb565"
+capabilities = { video = true, cover_flow = true, games = true }
+game_presentation = "color320"
+coverflow_cache = "expanded"
+media_photo_width = 320
+media_photo_height = 212
+media_video_width = 320
+media_video_height = 240
+media_video_fps = 30
+video_start_audio_frames = 12288 # About 0.28 s at 44.1 kHz AAC; audio_step fills during playback.
+media_video_color = "rgb565"
+media_video_backend = "native-mp4"
+media_art_side = 160
+video_catalog_cache = "resident"
+h264_decoder = "s5l8702-vpu"
+mpeg4_decoder = "s5l8702-vpu"
+media_video_extensions = [".mp4", ".m4v", ".mov"]
+cop_display = false
+runtime_policy = { music_browse_index = true, extended_sound = true }
+entry_address = 134217728
+load_address = 134217728
+mailbox_address = 201322496
+mailbox_bytes = 4096
+
+[retail]
+usb_vid = 1452
+usb_pid = 4705
+usb_identity_only = true
+sector_bytes = [512, 2048, 4096]
+board_names = []
+model_numbers = ["MB029", "MB147", "MB145", "MB150", "MB562", "MB565", "MC293", "MC297"]
+regulatory_models = ["A1238"]
+
+[native_storage]
+usb_vid = 4617
+usb_pid = 20555
+model = "LINNET IPOD CLASSIC USB Device"
+friendly_name = "LINNET IPOD CLASSIC"
+sector_bytes = [512, 2048, 4096]
+
+[installer]
+# The firmware-directory writer is for PortalPlayer. Classic setup uses its
+# separate device-authenticated NOR transaction in Media Manager.
+enabled = false
+boot_layout = "s5l-nor"
+file_loader = ".rockbox/rockbox.ipod"
+wrapper_model = "ip6g"
+wrapper_checksum_seed = 71
+
+[ui]
+allowed_themes = ["linnet.theme.ipod-classic", "linnet.theme.classic-cobalt", "linnet.theme.classic-ember", "linnet.theme.default", "local.example.midnight", "linnet.theme.graphite", "linnet.theme.aurora", "linnet.theme.sunset", "linnet.theme.blueprint", "linnet.theme.minimal-light", "linnet.theme.minimal-dark", "linnet.theme.album-colors"]
+default_theme = "linnet.theme.ipod-classic"
+
+[resources]
+music_titles_address = 198334464
+music_titles_bytes = 851968
+coverflow_catalog_slots = 4096
+
+[native_video]
+sample_bytes = 262144
+h264_width = 640
+h264_height = 480
+h264_level = 30
+mpeg4_width = 640
+mpeg4_height = 480
+max_fps = 30
+video_kbps = 1500
+max_video_kbps = 2500
+buffer_kbits = 5000
+audio_kbps = 160

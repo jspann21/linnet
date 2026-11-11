@@ -1,0 +1,22 @@
+[theme]
+id = "local.example.midnight"
+name = "Midnight"
+style = "standard"
+layout = "default"
+font = "../../../../../sdk/assets/font-sans14.json"
+font_license = "../../../../../sdk/assets/FONT-LICENSE.txt"
+
+[colors]
+foreground = "#e4e8f0"
+background = "#121c2c"
+accent = "#8cb8ff"
+muted = "#92a4bc"
+panel = "#243650"
+
+[metrics]
+row_height = 28
+padding = 6
+
+[assets]
+music = "../../../../../themes/default/music.ppm"
+artwork = "../../../../../themes/default/artwork.ppm"

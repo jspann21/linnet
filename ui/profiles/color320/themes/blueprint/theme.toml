@@ -1,0 +1,29 @@
+[theme]
+id = "linnet.theme.blueprint"
+name = "Blueprint"
+style = "standard"
+layout = "blueprint"
+font = "../../../../../sdk/assets/font-sans14.json"
+font_license = "../../../../../sdk/assets/FONT-LICENSE.txt"
+
+[colors]
+foreground = "#e4f1ff"
+background = "#102a48"
+accent = "#8dccff"
+muted = "#a7c3df"
+panel = "#1d4268"
+selection_fg = "#102a48"
+selection_bg = "#8dccff"
+status_fg = "#e4f1ff"
+status_bg = "#1d4268"
+border = "#4f80aa"
+artwork_bg = "#1d4268"
+artwork_fg = "#8dccff"
+
+[metrics]
+row_height = 26
+padding = 6
+
+[assets]
+music = "../../../../../themes/default/music.ppm"
+artwork = "../../../../../themes/default/artwork.ppm"

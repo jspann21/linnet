@@ -1,0 +1,26 @@
+[theme]
+id = "linnet.theme.minimal-light"
+name = "Minimal Light"
+layout = "minimal"
+font = "../../sdk/assets/font-compact13.json"
+
+[colors]
+foreground = "#171717"
+background = "#ffffff"
+accent = "#171717"
+muted = "#666666"
+panel = "#dedede"
+selection_fg = "#ffffff"
+selection_bg = "#171717"
+status_fg = "#171717"
+status_bg = "#ffffff"
+border = "#dedede"
+battery = "#171717"
+
+[metrics]
+row_height = 22
+padding = 4
+
+[assets]
+music = "../default/music.ppm"
+artwork = "../default/artwork.ppm"

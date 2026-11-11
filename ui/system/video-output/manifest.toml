@@ -1,0 +1,5 @@
+[app]
+id = "linnet.system.video-output"
+title = "Video Output"
+entry = "screen.tsx"
+capabilities = ["ui"]
