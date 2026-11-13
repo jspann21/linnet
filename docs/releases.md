@@ -8,10 +8,10 @@ not liable for device damage, data loss, or repair and recovery costs. See
 device.
 
 The **Build downloads** GitHub Actions workflow builds on version-tag pushes
-(`v*`), pull requests, and manual runs. Successful tag and manual runs provide
-`linnet-downloads` under **Actions** for one day. Pull requests build and verify
-the packages without uploading download artifacts. Public release assets remain
-on the repository's Releases page.
+(`v*`), pull requests, and manual runs. Each successful build provides
+`linnet-downloads` under **Actions → run → Artifacts** for one day. Sign in to
+GitHub to download the packages. PR packages contain the proposed changes for
+testing. Public release assets remain on the repository's Releases page.
 
 ## Download contents
 

@@ -77,7 +77,6 @@ jobs:
           }
           $checksums | Set-Content out/releases/SHA256SUMS.txt -Encoding utf8NoBOM
       - name: Save downloadable build artifacts
-        if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
           name: linnet-downloads

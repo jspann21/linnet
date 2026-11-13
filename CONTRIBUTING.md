@@ -30,6 +30,9 @@ against `main`. Describe the change and the checks you ran using the PR template
 All contributions require review and approval from @jspann21 and a passing build.
 New changes after approval require another review. Pull requests use squash merges.
 
+Successful PR builds provide installer and firmware downloads for one day, so
+testers can use the packages without compiling. See [Builds and downloads](docs/releases.md).
+
 Use [Discussions](https://github.com/jspann21/linnet/discussions) for questions and
 feature ideas, and the [issue forms](https://github.com/jspann21/linnet/issues/new/choose)
 for reproducible bugs or hardware problems. Report security vulnerabilities
