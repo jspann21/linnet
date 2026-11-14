@@ -33,6 +33,19 @@ and native OS publication copy the completed record onto the iPod for portable
 recovery. Media Manager validates the current recovery record and snapshots
 against this logic board.
 
+Classic User Disk Mode supports a recovery eject through Windows
+[SCSI pass-through](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ntddscsi/ns-ntddscsi-_scsi_pass_through).
+After verifying, locking and dismounting the selected volume, Media Manager sends
+a 16-byte vendor CDB: `0xc0` followed by ASCII `LINNET-RECOVERY`, with no data
+transfer. Disk Mode flushes ATA and acknowledges the command before resetting
+directly into the installed SRAM monitor, bypassing the OS and saved startup
+default. Disk Mode has no NOR write commands; the monitor still checks its build
+identity and the device-bound backups before restoration. Older Developer
+firmware retains its Link restart path. If older User firmware rejects recovery
+eject, update to the current User build, start the updated Linnet OS, then enter
+**Settings → USB Disk Mode**. The OS provides the updated Disk Mode directly;
+entering Disk Mode through an older persistent Boot can still use the old code.
+
 If a Classic restore stops while the SRAM monitor is running, use
 `python linnet device sram-bootstrap restore-nor --help`. Supply the saved
 `NOR.JSON`, its SHA-256, and the same host restore receipt. Restoration accepts

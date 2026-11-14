@@ -710,9 +710,6 @@ def _uninstall_option(marker, linnet, root, native, pending=None, boot_layout=No
         if classic and not native and marker["phase"] != "restored":
             return dict(available=False, previous=None,
                         detail="This Classic uses Linnet’s NOR bootloader. Start Linnet, open Disk Mode, and reconnect to restore the verified original boot flash before removal.")
-        if classic and native and linnet.get("next_profile", linnet.get("profile")) == "release":
-            return dict(available=False, previous=None,
-                        detail="This Classic’s NOR backup is verified. Removal needs Linnet Link: install a Developer build, start it, then reconnect in Linnet Disk Mode.")
         if (root / "LNETPEND").exists() or (root / "LNETPEND").is_symlink():
             return dict(available=False, previous=None,
                         detail="An unfinished Linnet reinstall archive (LNETPEND) is on this iPod. Resolve that archive before removing Linnet OS so its saved media is not lost.")

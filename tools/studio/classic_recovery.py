@@ -289,7 +289,7 @@ def preserve(identity, *, record_path=None):
         return saved
 
 
-def _enter_monitor(record, progress):
+def _enter_monitor(record, progress, *, restart=True):
     from tools.link.campaign import connect
     from tools.link.session import DeviceError
 
@@ -316,6 +316,8 @@ def _enter_monitor(record, progress):
                 # without that capability must match immediately.
                 if not running['capabilities'] & 16:
                     raise ValueError('The connected recovery monitor differs from this Classic’s verified installation')
+            if not restart:
+                raise ValueError('The Classic did not enter its verified recovery monitor; return to Linnet Disk Mode and refresh before retrying')
             if restart_requested:
                 time.sleep(.25)
                 continue
@@ -435,23 +437,25 @@ def _restore(identity, *, progress, instruction):
         guard_volume(identity)
         marker['nor_restore_receipt'] = str(receipt_path)
         _save(Path(identity['root']) / JOURNAL, marker, durable=True)
-        # Disk Mode eject starts the saved default system. Recovery needs the
-        # installed Developer OS's Link endpoint even when Apple is the user's
-        # normal default. The setting disappears with Linnet on successful
-        # removal; if recovery stops, Linnet remains reachable for a retry.
-        from tools.studio.startup_default import _decode, set_default
-        if marker.get('startup_default_format') == 1 and _decode(Path(identity['root']), nor.TARGET) != 'linnet':
-            progress('Selecting Linnet for the automatic recovery restart…')
-            set_default(identity, 'linnet')
+        from tools.studio.installer import installed_state
+        linnet = installed_state(identity['root'], nor.TARGET)
+        # Keep the Link route for older Developer firmware. User Disk Mode
+        # enters the resident monitor directly, independently of Boot defaults.
+        legacy = linnet.get('next_profile', linnet.get('profile')) in ('dev', 'trace')
+        if legacy:
+            from tools.studio.startup_default import _decode, set_default
+            if marker.get('startup_default_format') == 1 and _decode(Path(identity['root']), nor.TARGET) != 'linnet':
+                progress('Selecting Linnet for the automatic recovery restart…')
+                set_default(identity, 'linnet')
         progress('Safely ejecting Classic Disk Mode to enter bootloader recovery…')
         from tools.link.eject import eject
-        eject(identity['disk_number'], identity['disk_serial'])
+        eject(identity['disk_number'], identity['disk_serial'], recovery=not legacy)
         try:
-            _enter_monitor(record, progress)
+            _enter_monitor(record, progress, restart=legacy)
         except (OSError, RuntimeError) as error:
             raise RuntimeError('The Classic was safely ejected, but its recovery monitor could not be reached. '
-                               'No flash was written. A developer build with Linnet Link is required; '
-                               'return to Linnet Disk Mode before retrying. ' + str(error)) from error
+                               'No flash was written. Return to Linnet Disk Mode, refresh, and retry removal. '
+                               + str(error)) from error
         # The low-level restore records the mounted identity alongside the durable
         # full-flash readback, before asking Apple to restart.
         try:

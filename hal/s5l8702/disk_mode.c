@@ -17,7 +17,7 @@ static uint8_t wrapper[31],status_bytes[13];
 static uint32_t state,tag,residue,length,position,lba,blocks,block_bytes,block_shift,scale,capacity;
 static uint32_t batch_blocks,write_batch_bytes;
 static uint8_t status,sense_key,sense_code;
-static bool direction_in,reading,writing,eject,write_enabled,dirty;
+static bool direction_in,reading,writing,eject,recovery,write_enabled,dirty;
 static const char *device_serial;
 static uint32_t activity;
 static volatile uint32_t *const diagnostic=(volatile uint32_t *)(uintptr_t)0x22017c00u;
@@ -71,7 +71,7 @@ static void command(void) {
         ln_s5l_usb_stall(true);ln_s5l_usb_stall(false);state=INVALID;return;
     }
     tag=ln_read_le32(wrapper+4);residue=ln_read_le32(wrapper+8);direction_in=(wrapper[12]&0x80)!=0;
-    status=0;reading=writing=eject=false;position=length=0;state=STATUS;
+    status=0;reading=writing=eject=recovery=false;position=length=0;state=STATUS;
     const uint8_t *c=wrapper+15;
     uint32_t slot=12+((c[0]?diagnostic[1]++:diagnostic[1])%8)*6;
     if(c[0]) {
@@ -128,6 +128,18 @@ static void command(void) {
         if(reading){if(!disk_request(LN_ATA_READ))failure(3,0x11);else state=READ_WAIT;}
         else {state=RECEIVE;batch_blocks=write_batch_bytes>>block_shift;if(batch_blocks>blocks)batch_blocks=blocks;length=batch_blocks*block_bytes;}
         break;
+    case 0xc0: { /* Linnet recovery eject, available in User Disk Mode. */
+        static const char magic[]="LINNET-RECOVERY";
+        if(wrapper[14]!=16 || residue || !write_enabled){failure(5,0x24);break;}
+        bool valid=true;
+        for(unsigned i=0;i<15;i++)if(c[i+1]!=(uint8_t)magic[i])valid=false;
+        if(!valid){failure(5,0x24);break;}
+        /* Like ordinary eject, flush ATA and finish the status exchange before
+         * resetting. No flash access or developer transport lives here. */
+        eject=recovery=true;
+        if(!disk_request(LN_ATA_FLUSH))failure(4,0x44);else state=FLUSH_WAIT;
+        break;
+    }
     case 0x35: /* SYNCHRONIZE CACHE */
     case 0x1b: /* START STOP UNIT */
         if(residue){failure(5,0x24);break;}
@@ -182,7 +194,7 @@ static void step(void) {
         if(ln_s5l_usb_storage_write(status_bytes,sizeof(status_bytes)))state=STATUS_WAIT;
     } else if(state==STATUS_WAIT) {
         if(!ln_usb_flush(ln_time_us()+2000000u))ln_platform_hardware_reset();
-        if(eject && !status){ln_s5l_boot_request(LN_S5L_BOOT_NORMAL);ln_platform_hardware_reset();}
+        if(eject && !status){ln_s5l_boot_request(recovery?LN_S5L_BOOT_RECOVERY:LN_S5L_BOOT_NORMAL);ln_platform_hardware_reset();}
         state=CBW;position=0;
     }
 }

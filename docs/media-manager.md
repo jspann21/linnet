@@ -236,10 +236,14 @@ system files, settings, and prepared libraries. The Music, Photos, Videos, and
 Notes folders remain. Media prepared only for Linnet may need an Apple library
 sync to appear in Apple OS. A verified recovery backup is required.
 
-**Classic:** removal requires a Developer build with Linnet Link. If using a
-User build, install the matching Developer ZIP and eject safely to start it,
-then reconnect in Linnet Disk Mode. Keep the original bootloader backup. During
-removal, the iPod restarts into Apple software; its USB disk must appear in
+**Classic:** User builds support removal directly from Linnet Disk Mode. Keep
+the original bootloader backup. Media Manager safely ejects into the saved
+recovery monitor and restores the original boot flash. If older firmware rejects
+recovery eject, update to the latest Classic User ZIP, eject safely, start the
+updated Linnet OS, then choose **Settings → USB Disk Mode** and reconnect to
+retry removal. This uses the updated OS's Disk Mode even if the installed Boot
+image is older. During removal, the iPod
+restarts into the previous startup software; its USB disk must appear in
 Windows for cleanup to finish. Follow the reconnect dialog if it does not.
 If cleanup is interrupted, reconnect the same iPod and choose **Remove…** again.
 

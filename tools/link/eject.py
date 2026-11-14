@@ -296,14 +296,15 @@ $logical=Get-CimInstance Win32_LogicalDisk -Filter ("DeviceID='"+$drive+"'")
 
 
 def eject(disk_number: int, expected_serial: str,
-          wait_link: bool = False, link_serial: str | None = None) -> dict:
+          wait_link: bool = False, link_serial: str | None = None, *, recovery: bool = False) -> dict:
+    """Lock and flush the identified volume, then eject or enter Classic recovery."""
     if os.name != "nt":
         raise RuntimeError("device eject requires Windows")
     if (disk_number < 0 or not isinstance(expected_serial, str) or not expected_serial.strip() or
             (wait_link and (not isinstance(link_serial, str) or not link_serial.strip()))):
         raise ValueError("explicit disk number and nonempty expected serials are required")
     config = base64.b64encode(json.dumps(dict(number=disk_number,
-        serial=expected_serial.strip())).encode()).decode()
+        serial=expected_serial.strip(), recovery=recovery)).encode()).decode()
     script = r'''
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
@@ -320,7 +321,7 @@ $originalPartition = $parts[0]
 $originalVolume = Get-Volume -Partition $originalPartition
 if ([string]$originalVolume.FileSystemType -eq 'Unknown') { throw 'Selected volume media is already unavailable' }
 $drive = [string]$parts[0].DriveLetter + ':'
-$method = 'locked-volume'
+$method = if ($cfg.recovery) { 'locked-volume-recovery' } else { 'locked-volume' }
 # Recheck the identity immediately before the single eject request.
 $check = Get-Disk -Number $cfg.number -ErrorAction Stop
 if ($check.UniqueId -cne $disk.UniqueId -or $check.SerialNumber.Trim() -cne $cfg.serial) {
@@ -338,6 +339,16 @@ using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.Win32.SafeHandles;
 public static class LinnetVolumeEject {
+    // ntddscsi.h SCSI_PASS_THROUGH; ULONG_PTR follows the process bitness.
+    [StructLayout(LayoutKind.Sequential)]
+    struct ScsiPassThrough {
+        public ushort Length;
+        public byte ScsiStatus, PathId, TargetId, Lun, CdbLength, SenseInfoLength, DataIn;
+        public uint DataTransferLength, TimeOutValue;
+        public UIntPtr DataBufferOffset;
+        public uint SenseInfoOffset;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst=16)] public byte[] Cdb;
+    }
     [DllImport("kernel32.dll", CharSet=CharSet.Unicode, SetLastError=true)]
     static extern SafeFileHandle CreateFileW(string name, uint access, uint share,
         IntPtr security, uint creation, uint flags, IntPtr template);
@@ -368,7 +379,31 @@ public static class LinnetVolumeEject {
         if (end < 0 || Encoding.ASCII.GetString(descriptor, (int)offset, end-(int)offset).Trim() != serial)
             throw new InvalidOperationException("iPod disk serial changed");
     }
-    public static void Eject(string volume, uint disk, uint partition, string serial) {
+    static void RecoveryEject(SafeFileHandle handle) {
+        int header = Marshal.SizeOf(typeof(ScsiPassThrough));
+        var request = new ScsiPassThrough {
+            Length=(ushort)header, CdbLength=16, SenseInfoLength=32, DataIn=2,
+            TimeOutValue=20, SenseInfoOffset=(uint)header, Cdb=new byte[16]
+        };
+        request.Cdb[0]=0xc0;
+        Encoding.ASCII.GetBytes("LINNET-RECOVERY").CopyTo(request.Cdb, 1);
+        var packet = new byte[header+32];
+        IntPtr memory = Marshal.AllocHGlobal(header);
+        try {
+            Marshal.StructureToPtr(request, memory, false);
+            Marshal.Copy(memory, packet, 0, header);
+        } finally { Marshal.FreeHGlobal(memory); }
+        uint bytes = Control(handle, 0x4d004, packet, packet, "Classic recovery eject was not confirmed; reconnect and refresh before retrying");
+        if (bytes < header) throw new InvalidOperationException("Incomplete Classic recovery eject result; reconnect and refresh");
+        if (packet[2] != 0) {
+            bool unsupported = bytes >= header+14 && packet[7] >= 14 &&
+                (packet[header+2]&15) == 5 && (packet[header+12] == 0x20 || packet[header+12] == 0x24);
+            throw new InvalidOperationException(unsupported ?
+                "This firmware rejected Classic recovery eject. Update to the latest Classic User ZIP, eject safely, start the updated Linnet OS, then choose Settings > USB Disk Mode and reconnect before removing Linnet." :
+                "Classic recovery eject failed. Reconnect in Linnet Disk Mode and refresh before retrying; no boot flash was written.");
+        }
+    }
+    public static void Eject(string volume, uint disk, uint partition, string serial, bool recovery) {
         using (var handle = CreateFileW(volume.TrimEnd('\\'), 0xc0000000, 3, IntPtr.Zero, 3, 0, IntPtr.Zero)) {
             if (handle.IsInvalid) throw new Win32Exception(Marshal.GetLastWin32Error(), "Cannot open iPod volume");
             Verify(handle, disk, partition, serial);
@@ -377,13 +412,14 @@ public static class LinnetVolumeEject {
             Control(handle, 0x90018, null, null, "iPod is busy or could not be flushed; close apps using it and try again");
             Verify(handle, disk, partition, serial);
             Control(handle, 0x90020, null, null, "Could not dismount iPod");
-            Control(handle, 0x2d4808, null, null, "Windows could not eject iPod");
+            if (recovery) RecoveryEject(handle);
+            else Control(handle, 0x2d4808, null, null, "Windows could not eject iPod");
         }
     }
 }
 '@
 [LinnetVolumeEject]::Eject($originalVolume.UniqueId, $disk.Number,
-    $originalPartition.PartitionNumber, $cfg.serial)
+    $originalPartition.PartitionNumber, $cfg.serial, $cfg.recovery)
 $clock = [Diagnostics.Stopwatch]::StartNew()
 $confirmationState = 'Storage is still mounted'
 do {
