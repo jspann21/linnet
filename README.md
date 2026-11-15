@@ -32,7 +32,8 @@ simulator.
 
 https://github.com/user-attachments/assets/817822ca-d996-4715-b997-5a7aa66d4191
 
-[Watch the demo on YouTube](https://youtu.be/mB3y4ezb6fE).
+[Watch the demo on YouTube](https://youtu.be/mB3y4ezb6fE) ·
+[Watch the tutorial playlist](https://www.youtube.com/playlist?list=PLONMSRcyndkQ).
 
 ## Contents
 
@@ -42,6 +43,7 @@ https://github.com/user-attachments/assets/817822ca-d996-4715-b997-5a7aa66d4191
   - [Startup selection](#startup-selection)
   - [Add media](#add-media)
   - [Remove Linnet](#remove-linnet)
+- [Video tutorials](#video-tutorials)
 - [Music playback](#music-playback)
 - [Linnet Media](#linnet-media)
 - [Linnet Link](#linnet-link)
@@ -127,6 +129,18 @@ Linnet's system files, settings, and prepared libraries. Original Music, Photos,
 Videos, and Notes folders are kept. Follow the
 [removal instructions](docs/media-manager.md#reinstall-or-remove-linnet)
 for recovery requirements and the Classic's additional steps.
+
+## Video tutorials
+
+[Watch the Linnet tutorial playlist on YouTube](https://www.youtube.com/playlist?list=PLONMSRcyndkQ).
+The videos include chapters so you can jump to the step you need.
+
+- [Install Linnet on iPod Video (5th generation)](https://youtu.be/Q2ji967wQfE)
+- [Install Linnet on iPod Classic (6th and 7th generations)](https://youtu.be/qZHU7uFBDw0)
+- [Install Linnet on iPod Photo / Color](https://youtu.be/5F5ROFw3EO8)
+- [Device not recognized and hardware reports](https://youtu.be/MLHgTmjDeeg)
+- [Developer builds and Linnet Link](https://youtu.be/ck3KvlfObYY)
+- [Complete Media Manager walkthrough](https://youtu.be/tdMr4xLNegE)
 
 ## Music playback
 
