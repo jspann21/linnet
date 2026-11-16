@@ -141,6 +141,7 @@ The videos include chapters so you can jump to the step you need.
 - [Device not recognized and hardware reports](https://youtu.be/MLHgTmjDeeg)
 - [Developer builds and Linnet Link](https://youtu.be/ck3KvlfObYY)
 - [Complete Media Manager walkthrough](https://youtu.be/tdMr4xLNegE)
+- [Complete iPod guide: every menu, setting and navigation path](https://youtu.be/SdErw4DqLzQ)
 
 ## Music playback
 
