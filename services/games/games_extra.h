@@ -41,10 +41,7 @@ static int extra_wheel(int32_t value){
     if(ex_phase==EX_LEVEL){uint8_t next=(uint8_t)((ex_choice+value%3+3)%3);changed=next!=ex_choice;ex_choice=next;}
     else if(game==BRICK&&(ex_phase==EX_READY||ex_phase==EX_PLAY)){
         /* About three quarters of a wheel turn covers the full paddle range. */
-        int64_t target=(int64_t)br_target+(int64_t)value*12;
-        if(target<27)target=27;if(target>229)target=229;
-        changed=target!=br_target;br_target=(int16_t)target;
-        if(changed&&ex_phase==EX_READY){br_paddle=br_target;br_ball_x=(int32_t)br_paddle<<8;}
+        changed=br_move_paddle((int64_t)value*12);
     }else if(game==VORTEX&&(ex_phase==EX_READY||ex_phase==EX_PLAY)){
         uint8_t next=(uint8_t)(vx_angle+(uint32_t)value*3u);changed=next!=vx_angle;vx_angle=next;
     }else if(game==FALLING&&ex_phase==EX_PLAY){
@@ -68,7 +65,12 @@ static int extra_button(uint32_t pressed){if(pressed&1u){extra_leave();return 2;
 #if defined(LINNET_AUDIO)
         if(game==MUSIC_QUIZ){mq_restart();++hud_revision;return 1;}
 #endif
-        extra_start();return 1;}if(ex_phase==EX_LEVEL){if(pressed&4u)ex_choice=(ex_choice+1u)%3u;if(pressed&8u)ex_choice=(ex_choice+2u)%3u;if(pressed&16u){if(game==MINESWEEPER)ms_start_level(ex_choice);else ws_start_level(ex_choice);}++hud_revision;return 1;}if((extra_arcade()||game==REVERSI)&&(pressed&2u)){if(ex_phase==EX_PLAY){ex_phase=EX_PAUSED;if(game==FALLING)fb_lock_at=0;}else if(ex_phase==EX_PAUSED){ex_phase=EX_PLAY;ex_tick_at=0;}++hud_revision;return 1;}if(ex_phase==EX_PAUSED)return 1;if(game==BRICK){if((ex_phase==EX_READY||ex_phase==EX_PLAY)&&(pressed&16u)){br_launched=1;ex_phase=EX_PLAY;ex_tick_at=0;}if(pressed&4u){br_target+=16;if(br_target>229)br_target=229;}if(pressed&8u){br_target-=16;if(br_target<27)br_target=27;}if(ex_phase==EX_READY){br_paddle=br_target;br_ball_x=(int32_t)br_paddle<<8;}}
+        extra_start();return 1;}if(ex_phase==EX_LEVEL){if(pressed&4u)ex_choice=(ex_choice+1u)%3u;if(pressed&8u)ex_choice=(ex_choice+2u)%3u;if(pressed&16u){if(game==MINESWEEPER)ms_start_level(ex_choice);else ws_start_level(ex_choice);}++hud_revision;return 1;}if((extra_arcade()||game==REVERSI)&&(pressed&2u)){if(ex_phase==EX_PLAY){ex_phase=EX_PAUSED;if(game==FALLING)fb_lock_at=0;}else if(ex_phase==EX_PAUSED){ex_phase=EX_PLAY;ex_tick_at=0;}++hud_revision;return 1;}if(ex_phase==EX_PAUSED)return 1;
+    if(game==BRICK&&(ex_phase==EX_READY||ex_phase==EX_PLAY)){
+        if(pressed&4u)br_move_paddle(16);
+        if(pressed&8u)br_move_paddle(-16);
+        if(ex_phase==EX_READY&&(pressed&16u)){br_launched=1;ex_phase=EX_PLAY;ex_tick_at=0;}
+    }
     else if(game==VORTEX){if(ex_phase==EX_READY&&(pressed&16u)){ex_phase=EX_PLAY;ex_tick_at=0;}else if(ex_phase==EX_PLAY&&(pressed&16u))vx_fire();if(pressed&4u)vx_angle+=8u;if(pressed&8u)vx_angle-=8u;}
     else if(game==FALLING){if(ex_phase==EX_READY&&(pressed&16u)){ex_phase=EX_PLAY;ex_tick_at=0;}else if(ex_phase==EX_PLAY){if(pressed&4u)fb_drop(false);if(pressed&8u)fb_drop(true);if(pressed&16u){uint8_t rot=(fb_rot+1u)&3u,changed=0;if(!fb_hit(fb_x,fb_y,rot)){fb_rot=rot;changed=1;}else if(fb_x&&!fb_hit((int8_t)(fb_x-1u),fb_y,rot)){--fb_x;fb_rot=rot;changed=1;}else if(!fb_hit((int8_t)(fb_x+1u),fb_y,rot)){++fb_x;fb_rot=rot;changed=1;}if(changed&&fb_lock_at&&fb_lock_resets++<8u)fb_lock_at=ex_tick_at+350000u;}}}
     else if(game==MINESWEEPER&&ex_phase==EX_PLAY){if(pressed&4u)ms_cursor=(ms_cursor+1u)%(ms_w*ms_h);if(pressed&8u)ms_cursor=(ms_cursor+ms_w*ms_h-1u)%(ms_w*ms_h);if(pressed&2u&&!ms_open[ms_cursor]){ms_flag[ms_cursor]=!ms_flag[ms_cursor];sound_pending=1u;}if(pressed&16u)ms_reveal(ms_cursor);}

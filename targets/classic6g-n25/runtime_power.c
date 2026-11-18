@@ -78,7 +78,7 @@ void ln_power_policy_end(void){
         if(!slot&&elapsed>12000u){fast_until=now+2000000u;++heavy_fallbacks;}
     }
     struct ln_audio_status audio;ln_audio_snapshot(&audio);
-    if(!audio.playing&&!ln_display_busy())(void)ln_s5l_dma_idle_gate();
+    if(!audio.playing&&!audio.interactive&&!ln_display_busy())(void)ln_s5l_dma_idle_gate();
 }
 void ln_power_policy_diagnostics(uint32_t words[32]){
     uint32_t hz=account();for(unsigned n=0;n<32u;n++)words[n]=0;

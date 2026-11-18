@@ -57,6 +57,15 @@ static void arcade_shade(const struct ln_ui_canvas_context *c,int32_t x,int32_t 
         int32_t b=(top&31)*256+((int32_t)(bottom&31)-(top&31))*256*row/(h-1);
         uint16_t inks[4];for(uint32_t k=0;k<4u;++k){int32_t d=dither[yy&3][k]*16;
             inks[k]=(uint16_t)((((r+d)>>8)<<11)|(((g+d)>>8)<<5)|((b+d)>>8));}
-        for(int32_t xx=left;xx<right;++xx)c->pixels[yy*LINNET_UI_WIDTH+xx]=inks[xx&3];
+        uint16_t *pixels=c->pixels+yy*LINNET_UI_WIDTH;
+        int32_t xx=left;
+        for(;xx<right&&(xx&3);++xx)pixels[xx]=inks[xx&3];
+        for(;xx+3<right;xx+=4){
+            pixels[xx]=inks[0];
+            pixels[xx+1]=inks[1];
+            pixels[xx+2]=inks[2];
+            pixels[xx+3]=inks[3];
+        }
+        for(;xx<right;++xx)pixels[xx]=inks[xx&3];
     }
 }

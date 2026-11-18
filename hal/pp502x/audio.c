@@ -35,6 +35,7 @@ static volatile uint32_t head,tail,inflight;
 static volatile uint32_t inflight_last;
 static volatile bool real_block,active,pause_pending,owned,starved,draining,warming,start_armed,drain_ready,tail_ramp;
 static volatile bool finishing;
+static volatile bool idle_silence;
 static bool codec_ready,halted,dma_quiet,lineout_enabled;
 static bool digital_muted,output_muted;
 static volatile uint32_t mute_until;
@@ -84,8 +85,8 @@ static void arm(bool drain)
     click_block=!state.playing&&!drain;
     if(drain){source=native(silence);count=CHUNK;real_block=false;}
     else if(count){source=native(ring)+offset;real_block=true;starved=false;}
-    else {source=native(silence);count=click_block?click.left:CHUNK;real_block=false;
-        if(!click_block){if(!starved)++state.underruns;starved=true;}}
+    else {source=native(silence);count=click_block?click.left:idle_silence?CHUNK/2u:CHUNK;real_block=false;
+        if(!click_block&&!idle_silence){if(!starved)++state.underruns;starved=true;}}
     if(!count)return;
     /* A short feedback tone needs no copy of the following unmodified music
      * in IRQ context. Resume directly from the ring on the next completion. */
@@ -114,7 +115,7 @@ static void arm(bool drain)
     if(!drain&&ln_pcm_click_mix(&click,(uint32_t *)native(click_pcm),(const uint32_t *)source,count))source=native(click_pcm);
     inflight_last=real_block?source[count-1u]:0;
     inflight=count;active=true;dma_quiet=false;
-    if(real_block||click_block)start_armed=true;
+    if(real_block||click_block||(idle_silence&&!drain))start_armed=true;
     state.last_irq_us=ln_time_us();
     armed_us=state.last_irq_us;
     /* Rates are >=8kHz and count<=1024: both products fit uint32_t.
@@ -170,7 +171,7 @@ bool ln_audio_halt(void)
         return false; /* Never reuse a DMA source until BUSY clears. */
     }
     IIS&=~(1u<<29);FIFO|=1u<<8;
-    state.initialized=0;head=tail=0;finishing=false;completion_seen=false;
+    state.initialized=0;head=tail=0;finishing=idle_silence=false;completion_seen=false;
     halted=muted&&settled;
     if(!halted){codec_ready=false;state.fault=3;}
     return halted;
@@ -198,7 +199,7 @@ bool ln_audio_init(uint32_t rate)
     else if(!ln_audio_stop())return false;
     owned=true;
     if(!quiesce())return false;
-    state=(struct ln_audio_status){0};head=tail=0;pause_pending=draining=warming=drain_ready=false;starved=false;finishing=false;
+    state=(struct ln_audio_status){0};head=tail=0;pause_pending=draining=warming=drain_ready=false;starved=false;finishing=idle_silence=false;
     frame_us_q12=4096000000u/rate;completion_seen=false;
     if(warm){
         /* Analog paths and headphone gain remain latched across tracks. */
@@ -289,7 +290,7 @@ static bool startup_wait(uint32_t began,uint32_t timeout)
  * while state.playing and the ring cursors continue to describe media only. */
 static bool start_output(bool media)
 {
-    if(!state.initialized||state.fault||(media?head==tail:!click.left))return false;
+    if(!state.initialized||state.fault||(media?head==tail&&!idle_silence:!click.left))return false;
     if(state.playing&&!pause_pending&&!draining&&!digital_muted)return true;
     uint32_t flags=ln_core_irq_save();
     bool continuing=active&&real_block&&!output_muted;
@@ -339,6 +340,7 @@ failed:
     warming=false;ln_audio_service(ln_time_us());return false;
 }
 bool ln_audio_start(void){return start_output(true);}
+bool ln_audio_start_with_silence(void){idle_silence=true;return start_output(true);}
 void ln_audio_pause(void)
 {
     if((!state.playing&&!click_playing)||pause_pending||draining)return;
@@ -429,5 +431,8 @@ void ln_audio_snapshot(struct ln_audio_status *out)
 {
     if(!out)return;
     uint32_t flags=ln_core_irq_save();*out=state;
-    out->queued=head-tail;out->free_frames=ln_audio_capacity();ln_core_irq_restore(flags);
+    out->queued=head-tail;out->free_frames=ln_audio_capacity();
+    out->interactive=idle_silence;
+    if(idle_silence&&!out->queued)out->playing=0;
+    ln_core_irq_restore(flags);
 }

@@ -41,6 +41,7 @@ static volatile struct ln_audio_status status;
 static volatile uint32_t head,tail,inflight,armed,expected,previous,drain_until;
 static volatile uint32_t inflight_last;
 static volatile bool active,real,finishing,pause_pending,draining,starved,warming,start_armed,drain_ready,tail_ramp;
+static volatile bool idle_silence;
 static bool owned,codec_ready,lineout,muted,amplifier_open,clock_valid,powerdown_ready;
 static uint32_t frame_q12;
 static volatile uint32_t mute_until;
@@ -77,8 +78,8 @@ static bool arm(bool continuing) {
         if(count>LINNET_AUDIO_RING_FRAMES-offset)count=LINNET_AUDIO_RING_FRAMES-offset;
         starved=false;
     } else {
-        count=click_block?click.left:BLOCK;
-        if(!silence_only&&!click_block){if(!starved)status.underruns++;starved=true;}
+        count=click_block?click.left:idle_silence&&!silence_only?BLOCK/2u:BLOCK;
+        if(!silence_only&&!click_block&&!idle_silence){if(!starved)status.underruns++;starved=true;}
     }
     if(!count)return false;
     /* Bound feedback synthesis and cache cleaning before rearming DMA. The
@@ -103,7 +104,7 @@ static bool arm(bool continuing) {
     bool ok=continuing?ln_s5l_pcm_rearm(samples,count):ln_s5l_pcm_begin(samples,count);
     if(!ok){fault(2);return false;}
     inflight=count;active=true;armed=ln_time_us();expected=(count*frame_q12+4095u)>>12;
-    if(real||click_block)start_armed=true;
+    if(real||click_block||(idle_silence&&!silence_only))start_armed=true;
     ln_s5l_pcm_interrupt(true);ln_s5l_irq_enable(16,true);return true;
 }
 bool ln_audio_volume(int32_t value) {
@@ -143,7 +144,7 @@ bool ln_audio_halt(void) {
     }
     uint32_t flags=ln_s5l_irq_save();ln_s5l_irq_enable(16,false);
     bool stopped=ln_s5l_pcm_stop();
-    if(stopped){active=draining=pause_pending=warming=click_playing=false;head=tail=inflight=0;status.initialized=status.playing=status.paused=0;}
+    if(stopped){active=draining=pause_pending=warming=click_playing=idle_silence=false;head=tail=inflight=0;status.initialized=status.playing=status.paused=0;}
     else fault(3);
     ln_s5l_irq_restore(flags);
     if(!stopped&&codec_ready){
@@ -186,7 +187,7 @@ bool ln_audio_init(uint32_t rate) {
     uint32_t old_rate=status.rate;
     int32_t volume=warm?status.volume_db_tenths:-400;
     if(!ln_audio_halt())return false;
-    status=(struct ln_audio_status){0};head=tail=inflight=0;active=draining=finishing=pause_pending=starved=warming=drain_ready=false;
+    status=(struct ln_audio_status){0};head=tail=inflight=0;active=draining=finishing=pause_pending=starved=warming=drain_ready=idle_silence=false;
     for(uint32_t i=0;i<BLOCK;i++)silence[i]=0;
     tail_ramp=false;fade_remaining=0;
     owned=true;previous=0;frame_q12=period;mute_until=0;
@@ -267,7 +268,7 @@ static bool startup_wait(uint32_t began,uint32_t timeout) {
 }
 /* Keep click-only transfers separate from media ownership and ring cursors. */
 static bool start_output(bool media) {
-    if(!status.initialized || status.fault || (media?head==tail:!click.left))return false;
+    if(!status.initialized || status.fault || (media?head==tail&&!idle_silence:!click.left))return false;
     if(status.playing&&!pause_pending&&!draining&&!muted)return true;
     uint32_t flags=ln_s5l_irq_save();
     bool continuing=active&&real&&amplifier_open;
@@ -310,6 +311,7 @@ failed:
     warming=false;ln_audio_service(ln_time_us());return false;
 }
 bool ln_audio_start(void){return start_output(true);}
+bool ln_audio_start_with_silence(void){idle_silence=true;return start_output(true);}
 void ln_audio_pause(void) {
     if((!status.playing&&!click_playing) || pause_pending || draining)return;
     /* Keep LRCK running while the digital soft ramp settles. Headphone
@@ -385,6 +387,8 @@ uint32_t ln_audio_deadline(uint32_t now){
 void ln_audio_snapshot(struct ln_audio_status *out) {
     if(!out)return;
     uint32_t flags=ln_s5l_irq_save();*out=status;out->queued=head-tail;out->free_frames=ln_audio_capacity();
+    out->interactive=idle_silence;
+    if(idle_silence&&!out->queued)out->playing=0;
     if(active&&real){
         uint32_t dma[5];ln_s5l_pcm_status(dma);
         uint32_t remaining=(dma[2]+1u)/2u;

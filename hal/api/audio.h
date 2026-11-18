@@ -15,6 +15,9 @@ struct ln_audio_status {
     /* Frames transferred in the current block, excluded from consumed.
      * Backends without a hardware cursor leave this zero. */
     uint32_t inflight_consumed;
+    /* Interactive DMA can remain active between effects. Playing is false
+     * when this stream has no queued PCM, so media I/O can proceed. */
+    uint32_t interactive;
 };
 bool ln_audio_init(uint32_t rate);
 uint32_t ln_audio_submit(const int16_t *pcm, uint32_t frames);
@@ -22,6 +25,9 @@ uint32_t ln_audio_capacity(void);
 /* Absolute submitted frame index; rejects overlap with the active DMA block. */
 bool ln_audio_rewrite(uint32_t frame,const int16_t *pcm,uint32_t frames);
 bool ln_audio_start(void);
+/* Start an interactive stream with silence between queued effects. Init or
+ * halt clears this mode so subsequent media streams still detect underruns. */
+bool ln_audio_start_with_silence(void);
 void ln_audio_finish(void);
 void ln_audio_pause(void);
 bool ln_audio_stop(void);

@@ -14,8 +14,15 @@ static int32_t ex_sx(int32_t x){return 8+x*(LINNET_UI_WIDTH-16)/256;}
 static int32_t ex_sy(int32_t y){return 28+y*(LINNET_UI_HEIGHT-51)/170;}
 static void ex_brick(const struct ln_ui_canvas_context *c){
     char hud[32],*p=hud;append(&p,"SCORE ");number(&p,score);append(&p,"  BEST ");number(&p,best[BRICK]);*p=0;ex_frame(c,"Brick",hud);
-    for(uint8_t r=0;r<6u;++r)for(uint8_t col=0;col<8u;++col)if(br_bricks[r*8u+col]){int32_t x=ex_sx(col*32+2),y=ex_sy(22+r*9),w=ex_sx(col*32+30)-x,h=ex_sy(29+r*9)-y;uint16_t colors[3]={0x4edbu,0xf5ccu,0xbadfu};uint16_t color=colors[br_bricks[r*8u+col]-1u];arcade_panel(c,x,y,w,h,color);box(c,x+3,y+1,w-6,1,arcade_mix(ex_white,color,130));box(c,x+3,y+h-2,w-6,1,arcade_mix(color,ex_bg,150));}
-    int32_t px=ex_sx(br_paddle-25),py=ex_sy(151),pw=ex_sx(br_paddle+25)-px;arcade_panel(c,px,py,pw,7,ex_cyan);box(c,px+6,py+1,pw-12,2,ex_white);
+    for(uint8_t r=0;r<BR_ROWS;++r)for(uint8_t col=0;col<BR_COLS;++col)if(br_bricks[r*BR_COLS+col]){
+        int32_t left=col*BR_CELL_W,top=BR_WALL_TOP+r*BR_CELL_H;
+        int32_t x=ex_sx(left+2),y=ex_sy(top),w=ex_sx(left+BR_CELL_W-2)-x,h=ex_sy(top+BR_CELL_H-2)-y;
+        static const uint16_t colors[3]={0x4edbu,0xf5ccu,0xbadfu};
+        uint16_t color=colors[br_bricks[r*BR_COLS+col]-1u];
+        arcade_panel(c,x,y,w,h,color);box(c,x+3,y+1,w-6,1,arcade_mix(ex_white,color,130));box(c,x+3,y+h-2,w-6,1,arcade_mix(color,ex_bg,150));
+    }
+    int32_t px=ex_sx(br_paddle-BR_PADDLE_HALF),py=ex_sy(BR_PADDLE_Y),pw=ex_sx(br_paddle+BR_PADDLE_HALF)-px;
+    arcade_panel(c,px,py,pw,7,ex_cyan);box(c,px+6,py+1,pw-12,2,ex_white);
     int32_t bx=ex_sx(br_ball_x>>8),by=ex_sy(br_ball_y>>8);arcade_disc(c,bx,by,LINNET_UI_WIDTH>250?4:3,ex_white);box(c,bx-1,by-1,2,2,ex_cyan);
     for(uint8_t i=0;i<br_lives;++i)arcade_disc(c,10+i*10,LINNET_UI_HEIGHT-30,3,ex_gold);
     ex_footer(c,"Wheel: paddle  Select: launch","Play: pause  Menu: exit");

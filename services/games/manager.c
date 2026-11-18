@@ -253,19 +253,61 @@ void ln_games_draw(const struct ln_ui_canvas_context *c){
         c->pixels[y*LINNET_UI_WIDTH+x]=0x0841u;
     status(c,notice,LINNET_UI_HEIGHT/2u);status(c,"Menu: back",LINNET_UI_HEIGHT-24u);
 }
-static bool audio_owned;
+enum { AUDIO_IDLE_US = 3000000u, AUDIO_RETRY_US = 2000000u };
+static bool audio_owned,audio_failed,audio_has_cues;
+static uint32_t audio_used_at,audio_failed_at;
 static struct ln_game_cue queued_cue;
-void ln_games_audio_stop(void){if(audio_owned){(void)ln_audio_stop();audio_owned=false;}queued_cue.kind=0;}
+static void release_audio(void){
+    if(audio_owned){
+        struct ln_audio_status s;ln_audio_snapshot(&s);
+        /* Music or video may have reinitialized the sink since our last step. */
+        if(s.interactive)(void)ln_audio_stop();
+        audio_owned=false;
+    }
+    queued_cue.kind=0;
+}
+static void fail_audio(void){
+    release_audio();
+    audio_failed=true;
+    audio_failed_at=ln_time_us();
+}
+void ln_games_audio_stop(void){release_audio();audio_failed=audio_has_cues=false;}
 void ln_games_audio_step(void){
-    if(phase==ACTIVE){struct ln_game_cue cue;if(active.take_cue(&cue))queued_cue=cue;}
-    if(ln_player_busy()){audio_owned=false;queued_cue.kind=0;return;}
-    if(ln_music_loading()){ln_games_audio_stop();return;}
-    struct ln_audio_status s;ln_audio_snapshot(&s);
-    if(audio_owned&&!s.playing&&!queued_cue.kind){ln_games_audio_stop();return;}
-    if(!queued_cue.kind||(audio_owned&&s.playing))return;
-    struct ln_game_cue cue=queued_cue;queued_cue.kind=0;
-    if(cue.kind>9u||!ln_audio_init(22050u))return;
-    audio_owned=true;int16_t pcm[512];uint32_t phase_value=0;
+    if(phase!=ACTIVE)return;
+    struct ln_game_cue cue;
+    bool new_cue=active.take_cue(&cue)&&cue.kind&&cue.kind<=9u;
+    if(new_cue){queued_cue=cue;audio_has_cues=true;}
+    if(ln_player_busy()){audio_failed=false;queued_cue.kind=0;return;}
+    if(held||ln_music_loading()){release_audio();audio_failed=false;return;}
+
+    struct ln_audio_status s={0};
+    if(audio_owned){
+        ln_audio_snapshot(&s);
+        if(!s.interactive){audio_owned=audio_failed=false;s.queued=0;}
+        else if(!s.initialized||s.fault||s.paused){fail_audio();return;}
+    }
+    uint32_t now=ln_time_us();
+    bool playing=active.playing();
+    if(playing||queued_cue.kind||s.queued)audio_used_at=now;
+    if(!audio_owned){
+        /* The built-in games cue on entry. Keep the sink warm while they
+         * play, and let a silent game leave the codec off. */
+        if(!audio_has_cues||(!playing&&!queued_cue.kind))return;
+        if(audio_failed&&(!new_cue||now-audio_failed_at<AUDIO_RETRY_US)){
+            queued_cue.kind=0;
+            return;
+        }
+        audio_owned=ln_audio_init(22050u);
+        if(!audio_owned||!ln_audio_start_with_silence()){fail_audio();return;}
+        audio_failed=false;
+        audio_used_at=ln_time_us();
+    }else if(now-audio_used_at>=AUDIO_IDLE_US){
+        release_audio();
+        return;
+    }
+    if(!queued_cue.kind||s.queued)return;
+    cue=queued_cue;queued_cue.kind=0;
+    int16_t pcm[512];uint32_t phase_value=0;
     uint32_t step=cue.kind>=5u&&cue.kind<=8u?0x04000000u+(cue.kind-5u)*0x01000000u:
         cue.kind==3u?0x03000000u:cue.kind==4u?0x02000000u:cue.kind==2u?0x08000000u:0x06000000u;
     for(uint32_t part=0;part<(cue.kind==9u?16u:4u);++part){
@@ -275,7 +317,6 @@ void ln_games_audio_step(void){
             uint32_t envelope=cue.kind==9u?1024u-(at&1023u):1024u-at;
             int16_t sample=(int16_t)((triangle*(int32_t)envelope*38)>>10);
             pcm[i*2u]=pcm[i*2u+1u]=sample;phase_value+=step;}
-        if(ln_audio_submit(pcm,256u)!=256u){ln_games_audio_stop();return;}
+        if(ln_audio_submit(pcm,256u)!=256u){fail_audio();return;}
     }
-    ln_audio_finish();if(!ln_audio_start())ln_games_audio_stop();
 }
