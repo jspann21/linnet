@@ -210,8 +210,8 @@ bool ln_audio_stop(void)
 }
 bool ln_audio_init(uint32_t rate)
 {
-    click_owned=false;
     if(!ln_codec_rate_supported(rate))return false;
+    click_owned=false;
     bool warm=owned&&codec_ready&&!state.fault;
     uint32_t old_rate=state.rate;
     int32_t volume=state.volume_db_tenths;
@@ -253,6 +253,9 @@ stream_ready:
 failed:
     (void)ln_audio_stop();state.fault=3;return false;
 }
+#if defined(LINNET_IMAGE_OS)
+bool ln_audio_media_initialized(void){return state.initialized&&!click_owned;}
+#endif
 void ln_audio_click_stop(void){
     uint32_t flags=ln_core_irq_save();ln_pcm_click_clear(&click);ln_core_irq_restore(flags);
 }

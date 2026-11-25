@@ -21,6 +21,10 @@ struct ln_audio_status {
     uint32_t interactive;
 };
 bool ln_audio_init(uint32_t rate);
+#if defined(LINNET_IMAGE_OS)
+/* A configured playback stream owns the sink even before it starts. */
+bool ln_audio_media_initialized(void);
+#endif
 uint32_t ln_audio_submit(const int16_t *pcm, uint32_t frames);
 uint32_t ln_audio_capacity(void);
 /* Absolute submitted frame index; rejects overlap with the active DMA block. */

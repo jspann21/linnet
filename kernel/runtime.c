@@ -1080,7 +1080,7 @@ void ln_runtime_step(void){
     {
         struct ln_player_status player;ln_player_snapshot(&player);
         bool retain=!sleeping&&!shell->hold&&shell->headphones&&!scene_is(LN_UI_SCENE_GAME_PLAY)&&
-            (player.phase==LN_PLAYER_IDLE||player.phase==LN_PLAYER_PAUSE);
+            (player.phase==LN_PLAYER_PAUSE||(player.phase==LN_PLAYER_IDLE&&!ln_audio_media_initialized()));
 #if defined(LINNET_VIDEO)
         retain=retain&&!video_scene()&&!video_requested&&!ln_video_active()&&!ln_video_pending();
 #endif
@@ -1601,13 +1601,17 @@ int ln_runtime_control(uint32_t command,uint32_t argument){
         if(ln_photos_active()||ln_photos_pending())return 0;
 #endif
 #if defined(LINNET_AUDIO)
-        {struct ln_audio_status audio;ln_audio_snapshot(&audio);if(audio.initialized||ln_player_busy())return 0;}
+        if(ln_audio_media_initialized()||ln_player_busy())return 0;
 #endif
         if(argument<50u||argument>1000u||sleeping||ln_display_busy())return 0;
         #if defined(LINNET_STORAGE)
         if(!ln_storage_quiesce())return 0;
         #endif
-        if(!ln_power_sleep()){
+        bool audio_stopped=true;
+#if defined(LINNET_AUDIO)
+        audio_stopped=ln_audio_stop();
+#endif
+        if(!audio_stopped||!ln_power_sleep()){
 #if defined(LINNET_STORAGE)
             (void)ln_storage_resume();
 #endif

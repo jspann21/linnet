@@ -102,7 +102,7 @@ int ln_audio_link_dispatch(const ln_link_frame *q,ln_link_frame *r,uint8_t *repl
             p.next_phase,p.next_error,p.gapless_joins,p.missed_joins,(uint32_t)position,(uint32_t)(position>>32)};
         for(uint32_t i=0;i<16;++i)ln_write_le32(reply+i*4,words[i]);r->length=64;
     }else if(q->command==117){
-        if(q->length<6||q->length>260||ln_read_le32(q->payload)!=generation||q->payload[q->length-1]||a.initialized)return 1;
+        if(q->length<6||q->length>260||ln_read_le32(q->payload)!=generation||q->payload[q->length-1]||ln_audio_media_initialized())return 1;
         if(!ln_player_open((const char*)q->payload+4))return 1;
     }else if(q->command==118){
         if((q->length!=8&&q->length!=16)||ln_read_le32(q->payload)!=generation)return 1;
@@ -132,10 +132,12 @@ int ln_audio_link_dispatch(const ln_link_frame *q,ln_link_frame *r,uint8_t *repl
     }else{
         if(q->length<8||ln_read_le32(q->payload)!=generation||ln_storage_busy()||ln_player_busy())return 1;
         uint32_t value=ln_read_le32(q->payload+4);
+        bool media_initialized=ln_audio_media_initialized();
         if(q->command==113){
-            if(q->length!=8||a.initialized||!ln_audio_init(value))return 1;
+            if(q->length!=8||media_initialized||!ln_audio_init(value))return 1;
             ln_write_le32(reply+4,value);
-        }else if(q->command==114){
+        }else if(a.initialized&&!media_initialized)return 1;
+        else if(q->command==114){
             if(q->length<12||(q->length-8u)%4u||value!=a.submitted)return 1;
             uint32_t frames=(q->length-8u)/4u;if(frames>a.free_frames)return 1;
             for(uint32_t i=0;i<frames*2u;++i)pcm[i]=(int16_t)((uint16_t)q->payload[8+i*2]|(uint16_t)q->payload[9+i*2]<<8);

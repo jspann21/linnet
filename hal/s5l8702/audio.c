@@ -205,9 +205,9 @@ bool ln_audio_stop(void) {
     return shutdown_codec();
 }
 bool ln_audio_init(uint32_t rate) {
-    click_owned=false;
     uint32_t period=frame_period(rate),codec_rate;
     if(!period || !ln_codec_rate_supported(rate))return false;
+    click_owned=false;
     bool warm=owned && codec_ready && !status.fault;
     uint32_t old_rate=status.rate;
     int32_t volume=warm?status.volume_db_tenths:-400;
@@ -240,6 +240,9 @@ failed:
     else if(ln_codec_mute(ln_s5l_board_codec_write,true)){amplifier_open=false;muted=true;}
     status.fault=4;return false;
 }
+#if defined(LINNET_IMAGE_OS)
+bool ln_audio_media_initialized(void){return status.initialized&&!click_owned;}
+#endif
 void ln_audio_click_stop(void){
     uint32_t flags=ln_s5l_irq_save();
     ln_pcm_click_clear(&click);click_prepared=false;
