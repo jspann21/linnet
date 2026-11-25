@@ -9,6 +9,7 @@
 #include "boot/include/linnet_bytes.h"
 #endif
 #if defined(LINNET_AUDIO)
+#include "hal/api/audio.h"
 #include "kernel/audio_link.h"
 #endif
 #if defined(LINNET_PLATFORM_CORE) && defined(LINNET_IMAGE_OS)
@@ -244,6 +245,10 @@ void ln_development_poll(void) {
         if(response.flags==LINNET_LINK_ACK)ln_storage_link_ack_sent(response.command);
 #endif
         if (dispatcher.deferred) {
+#if defined(LINNET_IMAGE_OS) && defined(LINNET_AUDIO) && (defined(LINNET_SOC_PP5020) || defined(LINNET_SOC_PP5022))
+            /* REBOOT_DISK must drain and power down audio while DMA IRQs still run. */
+            if (dispatcher.deferred == 34u && !ln_audio_stop()) ln_recovery_return(14);
+#endif
             (void)ln_link_dispatch_ack_sent(&dispatcher, response.sequence);
             /* A successful boot/reboot/crash never returns. */
             ln_recovery_return(14);
