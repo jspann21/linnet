@@ -105,16 +105,23 @@ class SetupWorkspace:
 
     def update_setup_status(self):
         loading = self.busy and self.review is None
-        self.discovery_issue.setText('A connected iPod needs attention: ' + '; '.join(self.discovery_errors))
-        self.discovery_issue.setVisible(bool(self.discovery_errors))
         from tools.studio.device_support import describe
         support_identity = self.identity or (self.link_connection or {}).get('identity')
+        report = self.hardware_report or {}
+        connection = report.get('connection')
+        self.discovery_issue.setText('See Diagnostics for details about the iPod Linnet couldn’t read.')
+        self.discovery_issue.setVisible(bool(self.discovery_errors and not connection))
         if self.identity is None and self.link_connection:
             support_identity = dict(support_identity, **self.link_connection.get('product', {}))
-        support = describe(support_identity, self.review)
-        self.support_status.setText(self.hardware_report['summary'] if not support_identity and self.hardware_report else
-                                   support['title'] + ' — ' + support['detail'])
-        report = self.hardware_report or {}
+        if support_identity:
+            support = describe(support_identity, self.review)
+            support_text = support['title'] + ' — ' + support['detail']
+        elif connection:
+            support_text = connection['detail']
+        else:
+            support_text = report['summary'] if report.get('usb') or report.get('errors') else ''
+        self.support_status.setText(support_text)
+        self.support_status.setVisible(bool(support_text))
         hardware_context = bool((self.identity and self.device_connected) or self.link_connection or
                                 self.discovery_errors or any(report.get(key) for key in
                                 ('usb', 'disks', 'recognized', 'runtime', 'errors', 'discovery_issue_count')))
@@ -124,7 +131,8 @@ class SetupWorkspace:
         setting_up = bool(self.busy and self.active_operation and self.active_operation.tag=='classic_install')
         link = self.link_connection
         linked_os = bool(link and link['identity']['image_kind'] == 'os' and self.review is None)
-        self.connection_help.setVisible(self.identity is None and link is None and not setting_up)
+        show_disk_mode_help = not connection or connection['status'] in ('usb-only', 'no-media')
+        self.connection_help.setVisible(self.identity is None and link is None and not setting_up and show_disk_mode_help)
         self.setup_find_button.setVisible(self.identity is None and link is None and not setting_up)
         self.link_disk_button.setVisible(bool(link and link.get('can_open_disk')))
         self.link_disk_button.setEnabled(bool(link and link.get('can_open_disk')) and not self.busy)
@@ -151,6 +159,7 @@ class SetupWorkspace:
             self.setup_device.setText(link['target_name'].replace('Linnet for ', '') + ' · …' + link['serial'][-6:])
             build = installer.BUILD_LABELS[link['identity']['profile']]
             self.setup_software.setText('Connected through Linnet Link' if linked_os else 'Recovery connected')
+            self.setup_software.show()
             self.link_disk_button.setText('Open Disk Mode')
             self.link_build_status.setText(build + ' running')
             self.install_detail.setText('Setup is continuing automatically. Keep USB connected.' if setting_up else
@@ -163,9 +172,14 @@ class SetupWorkspace:
         if self.identity:
             self.setup_device.setText(self.device_title(self.identity))
             self.setup_software.setText('Checking iPod setup…' if loading else 'Choose Refresh to check installed software.')
+            self.setup_software.show()
+        elif connection:
+            self.setup_device.setText(connection['label'])
+            self.setup_software.setText(connection['title'])
+            self.setup_software.show()
         else:
             self.setup_device.setText('Looking for your iPod…' if loading else 'Connect your iPod with USB.')
-            self.setup_software.setText('Device detection is in progress.' if loading else '')
+            self.setup_software.hide()
 
     def review_uninstall_trash(self):
         if self.busy or not self.identity or not self.device_connected or not self.review or self.review['uninstall'].get('blocker') != 'trash':
@@ -188,6 +202,7 @@ class SetupWorkspace:
         self.setup_device.setText((identity.get('volume_label') or 'iPod') + ' · ' +
                                   identity['target_name'].replace('Linnet for ', ''))
         self.setup_software.setText('Connected by USB · ' + identity['drive'] + ' · …' + identity['disk_serial'][-6:])
+        self.setup_software.show()
         self.setup_software.setToolTip(installer.build_description(review['linnet']))
         native = review['identity'].get('native_target_id') == review['identity']['target_id']
         available_boot = [option for option in review['boot_options'] if option['kind'] == 'linnet']

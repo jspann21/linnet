@@ -176,21 +176,36 @@ class ControlRow(QWidget):
             self.updateGeometry()
 
 class StatusLabel(QLabel):
-    def __init__(self, text):
+    def __init__(self, text, *, overflow_text=None):
         super().__init__()
         self.setTextFormat(Qt.PlainText)
         self.setObjectName('muted'); self.setMinimumWidth(0)
         self.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Preferred)
         self.message = text
+        self.overflow_text = overflow_text
 
     def set_message(self, text, tooltip=None):
         self.message = text
         self.setToolTip(tooltip or text)
+        if self.overflow_text:
+            self.setAccessibleDescription(tooltip or text)
         self.render_message()
 
     def render_message(self):
-        self.setText(self.message if self.wordWrap() else
-                     self.fontMetrics().elidedText(self.message, Qt.ElideRight, max(0, self.contentsRect().width())))
+        if self.wordWrap():
+            self.setText(self.message)
+            return
+        width = max(0, self.contentsRect().width())
+        metrics = self.fontMetrics()
+        if self.overflow_text:
+            line = self.message.partition('\n')[0]
+            for text in (line, line.partition(' · ')[0], self.overflow_text):
+                if metrics.horizontalAdvance(text) <= width:
+                    self.setText(text)
+                    return
+            self.clear()
+        else:
+            self.setText(metrics.elidedText(self.message, Qt.ElideRight, width))
 
     def resizeEvent(self, event):
         super().resizeEvent(event)

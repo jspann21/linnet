@@ -262,7 +262,9 @@ Review the app's removal confirmation to see which files will change.
 | Problem | What to do |
 | --- | --- |
 | iPod not found | Enter Apple Disk Mode using the instructions in **iPod setup**, try a direct USB port, then **Find or switch iPod** again. |
-| USB detected but storage unavailable | Assign the existing FAT32 volume a drive letter in Windows Disk Management, then search again. |
+| FAT32 volume has no drive letter | Assign the existing volume a drive letter in Windows Disk Management, then search again. |
+| Disk appears to be Mac-formatted | Check it on a Mac and copy any files you want to keep. Media Manager needs MBR and FAT32. Restoring the iPod in iTunes for Windows erases it and prepares it for Windows. |
+| Windows reports no accessible storage | Re-enter Apple Disk Mode, then choose **Find iPod**. If Windows still reports no media, check whether the iPod itself can read its storage. |
 | Reading the collection takes a long time | Large libraries take longer, especially on the first read. Check progress or choose **Stop**. If iTunes is syncing, let it finish before refreshing. |
 | Firmware ZIP moved, missing, or rejected | Choose **Choose ZIP…** again and select a ZIP for the detected model. Leave it unextracted. |
 | Classic installation reports an unreadable disk block | Windows reported a bad block for this iPod during the installation attempt. Back up readable files and have the disk checked before resuming; reinstalling cannot repair damaged sectors. |

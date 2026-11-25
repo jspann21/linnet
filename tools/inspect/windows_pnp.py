@@ -23,6 +23,30 @@ def _api():
     return locate, parent, size, device_id
 
 
+def present_devices(device_filter: str, *, setup_class=False) -> list[str]:
+    """List present devices by setup class GUID or by enumerator name."""
+    cfg = ctypes.WinDLL("cfgmgr32", use_last_error=True)
+    get_size = cfg.CM_Get_Device_ID_List_SizeW
+    get_size.argtypes = [ctypes.POINTER(wintypes.ULONG), wintypes.LPCWSTR, wintypes.ULONG]
+    get_size.restype = wintypes.ULONG
+    get_list = cfg.CM_Get_Device_ID_ListW
+    get_list.argtypes = [wintypes.LPCWSTR, wintypes.LPWSTR, wintypes.ULONG, wintypes.ULONG]
+    get_list.restype = wintypes.ULONG
+    # CM_GETIDLIST_FILTER_PRESENT plus CLASS or ENUMERATOR.
+    flags = 0x100 | (0x200 if setup_class else 0x1)
+    for _ in range(2):
+        length = wintypes.ULONG()
+        if get_size(ctypes.byref(length), device_filter, flags) or not length.value:
+            break
+        buffer = ctypes.create_unicode_buffer(length.value)
+        result = get_list(device_filter, buffer, length.value, flags)
+        if result == 0:
+            return buffer[:].rstrip("\0").split("\0") if buffer[0] else []
+        if result != 0x1A:  # CR_BUFFER_SMALL, a device may have arrived mid-query.
+            break
+    raise RuntimeError("Could not list present Windows devices")
+
+
 def usb_parent(instance_id: str) -> str:
     """Return the first USB VID/PID ancestor, following at most five parent links."""
     if not instance_id:

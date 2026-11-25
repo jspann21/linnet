@@ -60,13 +60,16 @@ class DeviceWorkspace:
             self.transition_device(None)
             self.device_name.setText('No iPod connected'); self.device_info.setText('Connect in Disk Mode')
             if self.hardware_report:
-                self.device_name.setText('Compatibility needs checking' if self.hardware_report['usb'] else 'No iPod connection verified')
+                connection = self.hardware_report.get('connection')
+                name = 'Compatibility needs checking' if self.hardware_report['usb'] else 'No iPod connection verified'
+                self.device_name.setText(connection['title'] if connection else name)
                 self.device_info.setText('See iPod setup for details')
-                self.show_progress(self.hardware_report['summary'])
+                self.show_progress(connection['label'] if connection else
+                                   'See iPod setup' if self.hardware_report['usb'] or errors else 'No iPod found')
                 if errors:self.record_diagnostic('devices', 'DiscoveryError', '; '.join(errors), 'failed')
             elif errors:
                 self.record_diagnostic('devices', 'DiscoveryError', '; '.join(errors), 'failed')
-                self.show_progress('The connected iPod’s storage could not be read. Follow the Disk Mode steps in iPod setup, then choose Refresh.')
+                self.show_progress('iPod storage unavailable')
             else:
                 self.show_progress('Connect your iPod, then choose Refresh.')
             self.navigate('iPod setup')

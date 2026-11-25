@@ -70,47 +70,102 @@ def describe(identity=None, review=None):
 def _inventory():
     if os.name != "nt":
         raise RuntimeError("Hardware reports currently require Windows")
+    from tools.inspect.windows_pnp import present_devices, usb_parent
+
+    usb = {
+        instance.casefold(): dict(instance=instance)
+        for instance in present_devices("USB")
+        if re.match(r"^USB\\VID_(?:05AC|0000)&PID_|^USB\\VID_1209&PID_504[A-F]\\", instance, re.I)
+    }
+    disks = {}
+    disk_class = "{4d36e967-e325-11ce-bfc1-08002be10318}"
+    for instance in present_devices(disk_class, setup_class=True):
+        try:
+            parent = usb_parent(instance)
+        except RuntimeError:
+            continue
+        pair = _usb_id(parent)
+        apple_ipod = pair[0] == 0x05AC and instance.lower().startswith(r"usbstor\disk&ven_apple&prod_ipod&")
+        if parent.casefold() in usb and (_family(pair) or apple_ipod):
+            disks[instance.casefold()] = dict(usb_instance=parent)
+    errors = []
     script = r"""$ErrorActionPreference='Stop'
 [Console]::OutputEncoding=[Text.UTF8Encoding]::new($false)
-$usb=@(Get-PnpDevice -PresentOnly | Where-Object {
- $_.InstanceId -match '^USB\\VID_(05AC|0000)&PID_' -or
- $_.InstanceId -match '^USB\\VID_1209&PID_504[A-F]\\'
-} | Select-Object -First 32 | ForEach-Object {
- $problem=Get-PnpDeviceProperty -InstanceId $_.InstanceId -KeyName DEVPKEY_Device_ProblemCode -ErrorAction SilentlyContinue
- $driver=Get-PnpDeviceProperty -InstanceId $_.InstanceId -KeyName DEVPKEY_Device_DriverVersion -ErrorAction SilentlyContinue
- @{instance=$_.InstanceId;status=[string]$_.Status;problem=$problem.Data;driver_version=$driver.Data}
-})
-$disks=@(Get-CimInstance Win32_DiskDrive | Where-Object {
- $_.InterfaceType -eq 'USB' -and ($_.Model -eq 'Apple iPod USB Device' -or $_.Model -like 'LINNET IPOD*')
-} | Select-Object -First 16 | ForEach-Object {
- $w=$_
+$ids=ConvertFrom-Json -InputObject ([Console]::In.ReadToEnd())
+$errors=@()
+$usb=@(foreach ($id in $ids.usb) {
  try {
- $d=Get-Disk -Number $w.Index
- $parts=@(Get-Partition -DiskNumber $d.Number | ForEach-Object {
-  $p=$_;$v=$null;$letter=[string]$p.DriveLetter
-  if ($letter -notmatch '^[A-Za-z]$') {$letter=''}
-  if ($letter) {$v=Get-Volume -Partition $p -ErrorAction SilentlyContinue}
-  @{offset=[long]$p.Offset;bytes=[long]$p.Size;type=[string]$p.Type;
-    drive=$letter;filesystem=[string]$v.FileSystemType;
-    volume_id=[string]$v.UniqueId}
- })
- @{pnp_id=$w.PNPDeviceID;product_serial=([string]$w.SerialNumber).Trim();bytes=[long]$d.Size;logical_sector_bytes=[int]$d.LogicalSectorSize;
-   physical_sector_bytes=[int]$d.PhysicalSectorSize;read_only=[bool]$d.IsReadOnly;
-   offline=[bool]$d.IsOffline;partitions=$parts}
- } catch {@{pnp_id=$w.PNPDeviceID;error='storage-query-failed'}}
+  $node=Get-PnpDevice -InstanceId $id -PresentOnly
+  $problem=Get-PnpDeviceProperty -InstanceId $id -KeyName DEVPKEY_Device_ProblemCode -ErrorAction SilentlyContinue
+  $driver=Get-PnpDeviceProperty -InstanceId $id -KeyName DEVPKEY_Device_DriverVersion -ErrorAction SilentlyContinue
+  @{instance=$id;status=[string]$node.Status;problem=$problem.Data;driver_version=$driver.Data}
+ } catch {
+  $errors+=@{stage='usb-properties';type=$_.Exception.GetType().Name}
+  break
+ }
 })
-ConvertTo-Json -Depth 6 -Compress -InputObject @{usb=$usb;disks=$disks}
+$disks=@()
+if ($ids.disks.Count) {
+ try {
+  $disks=@(Get-CimInstance Win32_DiskDrive | Where-Object { $_.PNPDeviceID -in $ids.disks } | ForEach-Object {
+   $w=$_
+   $entry=@{pnp_id=$w.PNPDeviceID;product_serial=([string]$w.SerialNumber).Trim()}
+   try {
+    $d=Get-Disk -Number $w.Index
+    $entry.bytes=[long]$d.Size
+    $entry.logical_sector_bytes=[int]$d.LogicalSectorSize
+    $entry.physical_sector_bytes=[int]$d.PhysicalSectorSize
+    $entry.partition_style=[string]$d.PartitionStyle
+    $entry.operational_status=[string]$d.OperationalStatus
+    $entry.read_only=[bool]$d.IsReadOnly
+    $entry.offline=[bool]$d.IsOffline
+    if ($entry.bytes -gt 0 -and $entry.partition_style -in @('MBR','GPT') -and !$entry.offline) {
+     $entry.partitions=@(Get-Partition -DiskNumber $d.Number | Select-Object -First 16 | ForEach-Object {
+      $p=$_
+      $letter=[string]$p.DriveLetter
+      if ($letter -notmatch '^[A-Za-z]$') {$letter=''}
+      $v=Get-Volume -Partition $p -ErrorAction SilentlyContinue
+      @{offset=[long]$p.Offset;bytes=[long]$p.Size;type=[string]$p.Type;
+        mbr_type=$p.MbrType;drive=$letter;filesystem=[string]$v.FileSystem;
+        volume_id=[string]$v.UniqueId}
+     })
+    }
+   } catch {$entry.error='storage-query-failed'}
+   $entry
+  })
+ } catch {$errors+=@{stage='disk-inventory';type=$_.Exception.GetType().Name}}
+}
+ConvertTo-Json -Depth 6 -Compress -InputObject @{usb=$usb;disks=$disks;errors=$errors}
 """
-    result = subprocess.run(
-        ["powershell.exe", "-NoProfile", "-NonInteractive", "-Command", script],
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        timeout=30,
-        check=True,
-        creationflags=subprocess.CREATE_NO_WINDOW,
-    )
-    return json.loads(result.stdout.lstrip("\ufeff"))
+    try:
+        result = subprocess.run(
+            ["powershell.exe", "-NoProfile", "-NonInteractive", "-Command", script],
+            input=json.dumps(dict(usb=list(usb)[:32], disks=list(disks)[:16])),
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            timeout=30,
+            check=True,
+            creationflags=subprocess.CREATE_NO_WINDOW,
+        )
+        properties = json.loads(result.stdout.lstrip("\ufeff"))
+    except (OSError, ValueError, subprocess.SubprocessError) as error:
+        properties = {}
+        errors.append(dict(stage="windows-storage-properties", type=type(error).__name__))
+    errors.extend(properties.get("errors", []))
+    for item in properties.get("usb", []):
+        key = item["instance"].casefold()
+        if key in usb:
+            usb[key].update(item)
+    for item in properties.get("disks", []):
+        key = item["pnp_id"].casefold()
+        if key in disks:
+            try:
+                if usb_parent(item["pnp_id"]).casefold() == disks[key]["usb_instance"].casefold():
+                    disks[key].update(item)
+            except RuntimeError:
+                disks[key]["error"] = "disk-disconnected"
+    return dict(usb=list(usb.values()), disks=list(disks.values()), errors=errors)
 
 
 def _usb_id(instance):
@@ -139,6 +194,80 @@ def _fields(value, names):
         for name in names
         if name in value and isinstance(value[name], (str, int, bool, type(None)))
     }
+
+
+def _storage_status(disk):
+    if "bytes" not in disk:
+        return "disk-unavailable"
+    if disk.get("operational_status") == "No Media":
+        return "no-media"
+    if disk.get("offline"):
+        return "offline"
+    if disk["bytes"] == 0:
+        return "no-media"
+    partitions = disk["partitions"]
+    unknown = {"", "UNKNOWN", "RAW"}
+    filesystems = {part.get("filesystem", "").upper() for part in partitions} - unknown
+    if filesystems & {"HFS", "HFS+", "HFSX", "APFS", "MAC OS EXTENDED"}:
+        return "mac-format"
+    if disk.get("partition_style") == "GPT":
+        return "unsupported-layout"
+    if any(part.get("filesystem", "").upper() == "FAT32" and part["mounted"] for part in partitions):
+        return "volume-unverified"
+    if disk.get("partition_style") == "MBR" and any(
+        part.get("offset", 0) > 0 and not part["mounted"] and
+        (part.get("filesystem", "").upper() == "FAT32" or
+         (part.get("mbr_type") in (11, 12) and part.get("filesystem", "").upper() in unknown))
+        for part in partitions
+    ):
+        return "unmounted-fat32"
+    # Windows can expose an Apple Partition Map disk as a whole-disk volume
+    # with a synthetic MBR/FAT16 partition. The type alone is not a filesystem.
+    if not filesystems and len(partitions) == 1 and disk.get("partition_style") == "MBR":
+        part = partitions[0]
+        if part.get("offset") == 0 and part.get("bytes") == disk["bytes"] and part.get("mbr_type") == 4:
+            return "possible-mac-format"
+    if filesystems:
+        return "unsupported-layout"
+    return "format-unknown"
+
+
+def _connection_status(usb, disks):
+    families = [item for item in usb if item["targets"]]
+    family_ids = {item["vid_pid"] for item in families}
+    disks = [disk for disk in disks if disk["vid_pid"] in family_ids]
+    targets = {target for item in families for target in item["targets"]}
+    names = {TARGETS[target]["name"].removeprefix("Linnet for ") for target in targets}
+    if len(families) == len(disks) == 1:
+        products = [part.get("product", {}) for part in disks[0]["partitions"]]
+        models = {product["product_name"] for product in products
+                  if product.get("target_id") in targets
+                  and product.get("model_identity_source") == "live-product-serial"
+                  and not product.get("model_identity_conflict")}
+        if len(models) == 1:
+            names = models
+    title = next(iter(names)) if len(names) == 1 else "iPod"
+    statuses = {_storage_status(disk) for disk in disks}
+    if len(disks) < len(families):
+        statuses.add("usb-only")
+    status = next(iter(statuses)) if len(statuses) == 1 else "mixed"
+    mac_detail = ("To use Linnet, back up on a Mac and restore in iTunes for Windows. "
+                  "Restoring erases the iPod.")
+    messages = {
+        "usb-only": ("iPod connected", "Enter Apple Disk Mode to access its storage."),
+        "disk-unavailable": ("Storage unavailable", "Windows couldn’t read the iPod’s disk. Choose Find iPod to retry."),
+        "no-media": ("Storage unavailable", "Windows reports no accessible storage. Re-enter Apple Disk Mode."),
+        "offline": ("iPod disk offline", "Check the disk in Windows Disk Management."),
+        "mac-format": ("Mac-formatted iPod", mac_detail),
+        "possible-mac-format": ("Likely Mac-formatted iPod", mac_detail),
+        "unsupported-layout": ("Unsupported disk format", "Linnet requires an MBR disk with a FAT32 volume."),
+        "unmounted-fat32": ("Drive letter needed", "Assign a letter to the existing FAT32 volume in Disk Management."),
+        "volume-unverified": ("Storage needs checking", "Linnet couldn’t verify the FAT32 volume. Choose Find iPod to retry."),
+        "format-unknown": ("Unknown disk format", "Check the iPod’s format on a Mac before restoring."),
+        "mixed": ("Multiple iPods connected", "Reconnect the iPod you want to check."),
+    }
+    label, detail = messages[status]
+    return dict(status=status, title=title, label=label, detail=detail)
 
 
 def _sysinfo(partition):
@@ -188,8 +317,6 @@ def _sysinfo(partition):
 
 def collect(discovery=None, identity=None):
     """Capture observations without raw disk access, mode changes or writes."""
-    from tools.inspect.windows_pnp import usb_parent
-
     report = dict(
         format="linnet-hardware-report",
         version=1,
@@ -219,6 +346,7 @@ def collect(discovery=None, identity=None):
         report["errors"].append(
             dict(stage="windows-inventory", type=type(error).__name__)
         )
+    report["errors"].extend(inventory.get("errors", []))
     for item in inventory.get("usb", [])[:32]:
         pair = _usb_id(item.get("instance", ""))
         if not pair:
@@ -245,9 +373,7 @@ def collect(discovery=None, identity=None):
         )
     for item in inventory.get("disks", [])[:16]:
         try:
-            pair = _usb_id(usb_parent(item["pnp_id"]))
-            if not pair or not (pair[0] == 0x05AC or _family(pair)):
-                continue
+            pair = _usb_id(item["usb_instance"])
             disk = dict(
                 vid_pid=f"{pair[0]:04X}:{pair[1]:04X}",
                 **_fields(
@@ -256,6 +382,8 @@ def collect(discovery=None, identity=None):
                         "bytes",
                         "logical_sector_bytes",
                         "physical_sector_bytes",
+                        "partition_style",
+                        "operational_status",
                         "read_only",
                         "offline",
                         "error",
@@ -264,7 +392,7 @@ def collect(discovery=None, identity=None):
                 partitions=[],
             )
             for partition in item.get("partitions", [])[:16]:
-                entry = _fields(partition, ("offset", "bytes", "type", "filesystem"))
+                entry = _fields(partition, ("offset", "bytes", "type", "mbr_type", "filesystem"))
                 entry["mounted"] = bool(
                     re.fullmatch("[A-Za-z]", partition.get("drive", ""))
                 )
@@ -399,11 +527,9 @@ def collect(discovery=None, identity=None):
             found + " Open iPod setup to continue."
         )
     elif any(item["targets"] for item in report["usb"]):
-        report["summary"] = (
-            "iPod detected, but its storage identity could not be verified. "
-            "Choose Find iPod to try again. If it still fails, check Disk Mode, "
-            "its drive letter and FAT32 filesystem."
-        )
+        connection = _connection_status(report["usb"], report["disks"])
+        report["connection"] = connection
+        report["summary"] = f'{connection["title"]} · {connection["label"]}. {connection["detail"]}'
     elif any(item["mode"] == "linnet-link" for item in report["usb"]):
         report["summary"] = (
             "Linnet is not responding. Reconnect directly, then choose Find iPod."

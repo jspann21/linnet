@@ -204,7 +204,8 @@ class MediaWindow(
         self.progress = QProgressBar(); self.progress.setTextVisible(False); self.progress.hide(); foot.addWidget(self.progress)
         self.status_row = box(horizontal=True, spacing=12)
         self._activity_message = 'Looking for your iPod…'
-        self.status = StatusLabel(self._activity_message); self.status_row.addWidget(self.status, 1)
+        self.status = StatusLabel(self._activity_message, overflow_text='Hover for details')
+        self.status_row.addWidget(self.status, 1)
         self.status_actions = QWidget(); actions = box(self.status_actions, horizontal=True, spacing=12)
         self.cancel_button = button('Stop', self.stop, 'quiet'); self.cancel_button.setToolTip('Stop after the current step finishes'); self.cancel_button.hide(); actions.addWidget(self.cancel_button)
         self.refresh_button = button('Refresh', self.refresh, 'quiet', 'refresh'); actions.addWidget(self.refresh_button)

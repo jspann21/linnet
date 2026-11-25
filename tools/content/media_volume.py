@@ -45,6 +45,9 @@ foreach ($disk in @(Get-CimInstance -Namespace root/Microsoft/Windows/Storage -C
  }
  catch {$errors+=@{drive="Disk $($disk.Number)";message=[string]$_};continue}
  foreach ($partition in $partitions) {
+  # Leave a whole-disk placeholder reported as FAT16 to the compatibility report.
+  if ($disk.FriendlyName -eq 'Apple iPod' -and $partition.Offset -eq 0 -and
+      $partition.Size -eq $disk.Size -and $partition.MbrType -eq 4) {continue}
   $drive=[string]$partition.DriveLetter+':'
   try {
    $logical=Get-CimInstance Win32_LogicalDisk -Filter ("DeviceID='"+$drive+"'")
