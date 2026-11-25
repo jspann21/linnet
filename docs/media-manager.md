@@ -203,9 +203,12 @@ remove the desktop app.
 ## Update firmware and startup settings
 
 Connect in Disk Mode and open **iPod setup → Change firmware…**. Choose a new
-matching ZIP, then **Update firmware**. This also switches between User and
-Developer builds. Eject safely when the app says the update is ready. Media and
-settings are kept.
+matching User or Developer ZIP, then **Update firmware**. On iPod Video, Photo,
+and 4th-generation monochrome models with a User startup selector, the first
+Developer update also updates the startup selector. Windows asks for
+administrator approval when the selector is installed in the firmware partition.
+The updated selector starts either build, so later switches only update the OS.
+Eject safely when the app says the update is ready. Media and settings are kept.
 
 When **Startup** offers **Start automatically**, choose the default system and
 **Save**. Its startup selector also lets you hold **MENU** while the iPod starts

@@ -292,9 +292,16 @@ class SetupWorkspace:
         self.installed_build.setToolTip(installer.build_description(review['linnet']) if installed else '')
         candidate = bool(installed and review['linnet'].get('candidate_pending'))
         next_build = labels.get((review or {}).get('linnet', {}).get('next_profile'), 'Firmware')
-        self.build_summary.setText(next_build + ' ready to start. Eject safely to finish the update.' if candidate else
+        developer_error = (review or {}).get('developer_update_error')
+        startup_update = bool((review or {}).get('developer_startup_update'))
+        startup_detail = 'The first Developer update also updates the startup selector.'
+        staged_error = None
+        if candidate and review['linnet'].get('next_profile') != 'release':
+            staged_error = developer_error or ('Choose Developer firmware again to finish updating '
+                                               'the startup selector and firmware.' if startup_update else None)
+        self.build_summary.setText(staged_error or (next_build + ' ready to start. Eject safely to finish the update.' if candidate else
                                   'Includes diagnostics and Linnet Link.' if installed and profile in ('dev', 'trace') else
-                                  'For everyday listening.' if installed else 'Your media stays on the iPod.')
+                                  'For everyday listening.' if installed else 'Your media stays on the iPod.'))
         forced_editor = not installed or bool(review and review['action'] == 'resume') or pending
         show_editor = bool(can_install or upgrade or pending) and (self.build_editor_open or forced_editor)
         self.build_editor.setVisible(show_editor)
@@ -312,8 +319,8 @@ class SetupWorkspace:
         self.build_title.setVisible(from_source)
         self.boot_choice.setVisible(from_source)
         self.source_build_detail.setVisible(from_source)
-        self.source_build_detail.setText('Includes diagnostics and Linnet Link.' if option and option.get('build') == 'dev' else
-                                         'For everyday use.')
+        source_detail = developer_error or (startup_detail if startup_update else 'Includes diagnostics and Linnet Link.')
+        self.source_build_detail.setText(source_detail if option and option.get('build') == 'dev' else 'For everyday use.')
         self.source_options_button.setVisible(not resume)
         self.source_options_button.setEnabled(not self.busy and not resume)
         self.source_options.setVisible(not resume and self.source_options_button.isChecked())
@@ -331,6 +338,10 @@ class SetupWorkspace:
             state, action = 'source', 'Use a ZIP…'
         else:
             title, detail, state, action = (selection[key] for key in ('title', 'detail', 'state', 'action'))
+            if desired == 'dev' and developer_error:
+                detail, state = developer_error, 'warning'
+            elif desired == 'dev' and startup_update:
+                detail = startup_detail
         self.firmware_summary.setText(title)
         self.boot_detail.setText(detail)
         self.firmware_button.setText(action)
@@ -345,7 +356,7 @@ class SetupWorkspace:
         self.method_detail.setText(method.get('detail', '') if method and linnet else '')
         enabled = enabled and bool(method and method.get('enabled')) if linnet else enabled and not bool(option and option.get('active'))
         if linnet and not resume and not from_source:
-            enabled = enabled and bool(firmware)
+            enabled = enabled and bool(firmware) and not (desired == 'dev' and developer_error)
         self.method_choice.setEnabled(bool(linnet and method) and not self.busy)
         self.boot_choice.setEnabled(from_source and not self.busy and self.review is not None and self.boot_choice.count() > 0)
         self.install_button.setEnabled(enabled)
@@ -430,6 +441,9 @@ class SetupWorkspace:
                             'will be preserved. ' + ('The confirmed OS will be retained for rollback.'
                             if method['strategy'] == 'native-volume' else
                             'Superseded Linnet system files will be archived.'))
+        if option.get('build') == 'dev' and self.review.get('developer_startup_update') == 'native-directory':
+            description += ('\n\nWindows will request administrator approval for the one-time '
+                            'startup selector update. Later firmware switches use the updated selector.')
         if not self.dialog('Resume installation' if resume else 'Install firmware',
                            description + '\n\nKeep the iPod connected until installation finishes.',
                            'Resume' if resume else 'Install'):

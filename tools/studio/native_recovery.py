@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-import shutil
 import uuid
 
 from tools.studio import native_bootstrap as native
@@ -22,10 +21,9 @@ def _directory_target(identity):
 
 def _upgrade_volume_identity(identity, transaction, path, digest, manifest, artifacts):
     """Verify the FAT identity recorded by a completed native Boot upgrade."""
-    storage = json.loads(artifacts['device.json'])['storage']
-    if (path != transaction / 'apple-recovery-plan/plan.json' or
-            storage['disk_serial'] != identity['linnet_usb_serial']):
+    if path != transaction / 'apple-recovery-plan/plan.json':
         return False
+    apple_device = json.loads(artifacts['device.json'])
     for worker_path in transaction.glob('worker-*.json'):
         try:
             job = json.loads(worker_path.read_text(encoding='utf-8'))
@@ -34,11 +32,8 @@ def _upgrade_volume_identity(identity, transaction, path, digest, manifest, arti
             if (job['mode'] != 'upgrade-boot' or
                     Path(job['transaction']).resolve(strict=True) != transaction or
                     result_path.parent != transaction or
-                    recorded['native_target_id'] != identity['target_id'] or
-                    recorded['disk_serial'] != storage['disk_serial'] or
-                    recorded['volume_unique_id'] != storage['volume_id'] or
                     any(recorded[key] != identity[key] for key in
-                        ('target_id', 'linnet_usb_serial', 'volume_serial', 'disk_bytes',
+                        ('target_id', 'volume_serial', 'disk_bytes',
                          'sector_bytes', 'partition_offset', 'partition_bytes'))):
                 continue
             result = json.loads(result_path.read_text(encoding='utf-8'))
@@ -49,20 +44,35 @@ def _upgrade_volume_identity(identity, transaction, path, digest, manifest, arti
                     Path(recovery['plan']).resolve(strict=True) != path or recovery['plan_sha256'] != digest or
                     recovery['device_id'] != manifest['expected_storage_serial'] or
                     recovery['target_id'] != identity['target_id'] or
-                    recovery['linnet_usb_serial'] != identity['linnet_usb_serial'] or
+                    recovery.get('native_usb_serial', recovery['linnet_usb_serial']) != identity['linnet_usb_serial'] or
                     recovery['boot_build_id'] != manifest['image']['build_id'] or
                     recovery['firmware_backup_sha256'] != manifest['firmware_backup_sha256'] or
                     applied['operation'] != 'apply' or applied['passed'] is not True or
                     applied['after']['directory'] != 'candidate' or
-                    applied['after']['original_payload_intact'] is not True or
-                    Path(applied['plan']).resolve(strict=True) != transaction / 'native-plan/plan.json'):
+                    applied['after']['original_payload_intact'] is not True):
+                continue
+            applied_path = Path(applied['plan']).resolve(strict=True)
+            if not recorded['native_target_id']:
+                if (recorded['disk_serial'] == manifest['expected_storage_serial'] and
+                        recorded['linnet_usb_serial'] == apple_device['linnet_usb_serial'] and
+                        applied_path == path and applied['reviewed_plan_sha256'] == digest):
+                    return True
+                continue
+            if (recorded['native_target_id'] != identity['target_id'] or
+                    recorded['linnet_usb_serial'] != identity['linnet_usb_serial'] or
+                    applied_path != transaction / 'native-plan/plan.json'):
                 continue
             native_manifest, native_artifacts, _firmware = native.load_plan(
                 applied['plan'], applied['reviewed_plan_sha256'])
-            # Upgrade plans retain the native device.json; only the execution
-            # serial differs in the Apple recovery descriptor. Verify all bytes.
-            if (native_manifest == dict(manifest, expected_storage_serial=storage['disk_serial']) and
-                    native_artifacts == artifacts):
+            native_device = json.loads(native_artifacts['device.json'])
+            if (native_manifest['expected_storage_serial'] == recorded['disk_serial'] and
+                    native_manifest['expected_linnet_usb_serial'] == recorded['linnet_usb_serial'] and
+                    native_device['storage']['volume_id'] == recorded['volume_unique_id'] and
+                    native_manifest == dict(manifest,
+                        expected_storage_serial=recorded['disk_serial'],
+                        expected_linnet_usb_serial=recorded['linnet_usb_serial'],
+                        artifacts=dict(manifest['artifacts'], **{'device.json': native_manifest['artifacts']['device.json']})) and
+                    all(native_artifacts[name] == data for name, data in artifacts.items() if name != 'device.json')):
                 return True
         except (OSError, ValueError, KeyError, TypeError, AttributeError):
             continue
@@ -88,8 +98,7 @@ def _inputs(identity, transaction, path, digest, device_id, *, cache_scope=None)
             saved['target_id'] != identity['target_id'] or
             manifest['expected_storage_serial'] != device_id or
             storage['disk_serial'] not in (device_id, identity['linnet_usb_serial']) or
-            manifest['expected_linnet_usb_serial'] != identity['linnet_usb_serial'] or
-            saved['linnet_usb_serial'] != identity['linnet_usb_serial'] or
+            manifest['expected_linnet_usb_serial'] != saved['linnet_usb_serial'] or
             identity['disk_serial'] != (identity['linnet_usb_serial'] if eligible(identity) else device_id) or
             Path(manifest['firmware_backup']).resolve(strict=True) != transaction / 'backup/firmware.bin' or
             manifest['expected_device_bytes'] != identity['disk_bytes'] or
@@ -108,8 +117,9 @@ def _inputs(identity, transaction, path, digest, device_id, *, cache_scope=None)
                 original.get('disk_serial') == device_id and
                 original.get('volume_unique_id') == storage.get('volume_id') and
                 original.get('volume_serial') == identity['volume_serial'] and
+                original.get('linnet_usb_serial') == saved['linnet_usb_serial'] and
                 all(original.get(key) == identity[key] for key in
-                    ('target_id', 'linnet_usb_serial', 'disk_bytes', 'sector_bytes', 'partition_offset', 'partition_bytes'))):
+                    ('target_id', 'disk_bytes', 'sector_bytes', 'partition_offset', 'partition_bytes'))):
             originals.append(original)
     if not originals and not _upgrade_volume_identity(identity, transaction, path, digest, manifest, artifacts):
         raise ValueError('The original installation has no matching FAT volume identity')
@@ -210,21 +220,7 @@ def bind(identity, transaction, path, digest, device_id, *, cache_scope=None):
                 ('disk_number', 'disk_serial', 'disk_bytes', 'sector_bytes', 'partition_offset', 'partition_bytes'))):
         raise ValueError('Native storage changed before recovery binding')
     output = Path(transaction) / ('native-binding-' + uuid.uuid4().hex)
-    output.mkdir(exist_ok=False)
-    for name in native.ARTIFACTS:
-        shutil.copyfile(Path(path).parent / name, output / name)
-    native.save_json(output / 'device.json', detected)
-    data = (output / 'device.json').read_bytes()
-    entries = dict(manifest['artifacts'])
-    entries['device.json'] = dict(bytes=len(data), sha256=native.sha(data))
-    rebound = dict(manifest, expected_storage_serial=current['disk_serial'], artifacts=entries)
-    native.save_json(output / 'plan.json', rebound)
-    result_path = output / 'plan.json'
-    result_hash = native.sha(result_path.read_bytes())
-    _new, new_artifacts, _backup = native.load_plan(result_path, result_hash)
-    if any(new_artifacts[name] != artifacts[name] for name in native.ARTIFACTS if name != 'device.json'):
-        raise ValueError('Native binding changed a firmware recovery artifact')
-    return result_path, result_hash
+    return native.rebind_plan(manifest, artifacts, output, detected)
 
 
 def finish(job):

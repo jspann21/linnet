@@ -40,10 +40,25 @@ def _provision(root, image, capacity, guard):
     guard()
 
 
+def _publish_record(path, payload, generation, boot_generation, capacity, guard):
+    struct.pack_into('<I', payload, 16, boot_generation)
+    struct.pack_into('<I', payload, 36, zlib.crc32(payload[8:36]))
+    publication = record(payload, generation)
+    guard()
+    with path.open('r+b') as stream:
+        stream.write(publication)
+        stream.flush()
+        os.fsync(stream.fileno())
+    result = _boot_record(path, capacity)
+    if result[0] != publication:
+        raise OSError('boot metadata readback failed; inspect before retrying')
+    return result
+
+
 def publish(identity, image_path):
     from tools.content.media_manager import refresh
     from tools.content.publish import _exclusive, _plain, _volume_guard
-    from tools.studio.installer import installed_state
+    from tools.studio.installer import assess, installed_state
     image_path = Path(image_path)
     spec = TARGETS[identity['target_id']]
     with image_path.open('rb') as stream:
@@ -97,21 +112,41 @@ def publish(identity, image_path):
                         summary='Linnet is installed. Safely eject the iPod to start it.')
         if state['state'] != 'installed':
             raise ValueError('native update requires a valid confirmed installation')
+        if (info['profile'] != 'release' and state['profile'] == 'release' and
+                spec['installer']['boot_layout'] == 'ipod-directory'):
+            review = assess(current, _validated_identity=True)
+            if review['developer_update_error']:
+                raise ValueError(review['developer_update_error'])
+            if review['developer_startup_update']:
+                raise ValueError('Update to Developer firmware through iPod setup to upgrade its startup selector first.')
         paths = [directory / name for name in ('BOOT0.BIN', 'BOOT1.BIN')]
         copies = [_boot_record(path, spec['os_capacity_bytes']) for path in paths]
         selected = max(range(2), key=lambda index: copies[index][1])
         data, generation = copies[selected][:2]
-        if data[53] != 255 or data[54]:
+        if data[54]:
             raise ValueError('finish the pending firmware update before publishing another')
         payload = bytearray(data[28:212])
         boot_generation = struct.unpack_from('<I', payload, 16)[0]
-        if generation == 0xffffffff or boot_generation == 0xffffffff:
-            raise ValueError('boot metadata generation exhausted')
         slot = 1 - data[52]
+        offset = 40 + slot * 72
+        withdraw = struct.unpack_from('<I', payload, offset)[0] != 0
+        steps = 2 if withdraw else 1
+        if generation > 0xffffffff - steps or boot_generation > 0xffffffff - steps:
+            raise ValueError('boot metadata generation exhausted')
         image_path = directory / f'OS{slot}.LOS'
         _plain(image_path, root)
         if image_path.stat().st_size != spec['os_capacity_bytes']:
             raise ValueError('inactive OS slot has incorrect capacity')
+        if withdraw:
+            # Withdraw the inactive image durably before overwriting its slot.
+            # The confirmed image remains selectable if the replacement fails.
+            payload[25] = 255
+            payload[offset:offset + 72] = bytes(72)
+            selected = 1 - selected
+            generation += 1
+            boot_generation += 1
+            copies[selected] = _publish_record(paths[selected], payload, generation, boot_generation,
+                                               spec['os_capacity_bytes'], lambda: _volume_guard(current))
         _volume_guard(current)
         with image_path.open('r+b') as stream:
             stream.write(image)
@@ -125,21 +160,11 @@ def publish(identity, image_path):
                for path, prior in zip(paths, copies)):
             raise RuntimeError('boot metadata changed during update')
         payload[25] = slot
-        struct.pack_into('<I', payload, 16, boot_generation + 1)
-        struct.pack_into('<I', payload, 36, zlib.crc32(payload[8:36]))
-        offset = 40 + slot * 72
         struct.pack_into('<II', payload, offset, len(image), ('release', 'dev', 'trace').index(info['profile']))
         payload[offset + 8:offset + 40] = bytes.fromhex(info['build_id'])
         payload[offset + 40:offset + 72] = hashlib.sha256(image).digest()
-        publication = record(payload, generation + 1)
-        _volume_guard(current)
-        destination = paths[1 - selected]
-        with destination.open('r+b') as stream:
-            stream.write(publication)
-            stream.flush()
-            os.fsync(stream.fileno())
-        if _boot_record(destination, spec['os_capacity_bytes'])[0] != publication:
-            raise OSError('candidate metadata readback failed; inspect before retrying')
+        _publish_record(paths[1 - selected], payload, generation + 1, boot_generation + 1,
+                        spec['os_capacity_bytes'], lambda: _volume_guard(current))
         return dict(passed=True, candidate_published=True, requires_safe_eject=True,
                     image=info, slot=slot, confirmed_build=state['build_id'],
                     summary='Firmware update prepared. Safely eject the iPod to start it; the previous confirmed OS remains available for rollback.')

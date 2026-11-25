@@ -256,6 +256,9 @@ def installed_state(root, target_id):
         expected_sha = selected[0][metadata_offset + 40:metadata_offset + 72].hex()
         images = []
         for slot, name in enumerate(("OS0.LOS", "OS1.LOS")):
+            # An interrupted update can leave partial bytes in a withdrawn slot.
+            if not struct.unpack_from("<I", selected[0], 68 + slot * 72)[0]:
+                continue
             path = directory / name
             with path.open("rb") as reader:
                 header = reader.read(128)
@@ -280,7 +283,7 @@ def installed_state(root, target_id):
         return dict(state="installed", present=len(present), required=len(CORE_FILES),
                     build_id=build_id, image_sha256=confirmed['sha256'], profile=confirmed["profile"], build="user" if confirmed["profile"] == "release" else "dev", images=images,
                     next_profile=next((item["profile"] for item in images if item["slot"] == selected[0][53]), confirmed["profile"]),
-                    candidate_pending=selected[0][53] != 255 or bool(selected[3]))
+                    candidate_pending=selected[0][53] != 255, candidate_attempt_pending=bool(selected[3]))
     except (ValueError, OSError, KeyError, struct.error) as error:
         return dict(state="invalid", present=len(present), required=len(CORE_FILES), detail=str(error))
 
@@ -461,13 +464,15 @@ def assess(identity, *, _validated_identity=False):
             value = json.loads(marker_path.read_text(encoding="utf-8"))
             same_storage = value.get("device_id") == identity["disk_serial"]
             same_native_usb = (identity.get("native_target_id") == target_id and
-                               value.get("linnet_usb_serial") == identity.get("linnet_usb_serial"))
+                               value.get("native_usb_serial", value.get("linnet_usb_serial")) == identity.get("linnet_usb_serial"))
             if (value.get("target_id") == target_id and
-                    (same_storage or same_native_usb) and
                     value.get("strategy") in ("rockbox-file", "native-directory") and
                     value.get("phase") in ("installed", "restored", "boot-upgrade-pending")):
-                marker = value
-        except (ValueError, OSError):
+                from tools.studio.boot_upgrade import legacy_journal_matches
+                if same_storage or same_native_usb or (linnet['state'] == 'installed' and
+                        legacy_journal_matches(identity, value)):
+                    marker = value
+        except (ValueError, OSError, AttributeError):
             marker = None
     if marker is None and linnet["state"] != "absent":
         bootstrap_path = root / ".LINNET" / "RECOVERY" / "BOOTSTRAP.JSON"
@@ -582,6 +587,8 @@ def assess(identity, *, _validated_identity=False):
         linnet, rockbox, others, marker, action, resume,
         active_override="rockbox" if external_rockbox else None)
     installation_methods, default_method = _installation_methods(action, rockbox, marker, resume)
+    developer_update_error = None
+    developer_startup_update = None
     if classic_conflict:
         installation_methods, default_method = [], None
         for option in boot_options:option['selectable']=False
@@ -592,14 +599,41 @@ def assess(identity, *, _validated_identity=False):
         default_method = 'native-preserve'
     elif native and action != 'resume':
         available = (linnet["state"] in ("installed", "absent", "incomplete") and
-                     not linnet.get("candidate_pending") and
+                     not linnet.get("candidate_attempt_pending") and
                      not (marker and marker.get("phase") == "boot-upgrade-pending"))
         initial = linnet["state"] in ("absent", "incomplete")
+        if install_spec['boot_layout'] == 'ipod-directory' and linnet.get('profile') == 'release':
+            from tools.studio.boot_upgrade import installed_profile
+            from tools.studio.apple_firmware import available as apple_available
+            from tools.studio.bootstrap import status as bootstrap_status
+            startup_profile = installed_profile(dict(identity=identity, linnet=linnet, recovery=marker, rockbox=rockbox))
+            if startup_profile == 'release' and apple_available(root, target_id):
+                developer_startup_update = 'native-directory'
+            elif startup_profile is None and marker and marker['strategy'] == 'rockbox-file' and marker['phase'] == 'installed':
+                try:
+                    boot_file = bootstrap_status(root)
+                    if (boot_file['target_id'] == target_id and boot_file['phase'] == 'installed' and
+                            boot_file['backup_valid'] and boot_file['active_sha256'] == boot_file['candidate_sha256']):
+                        startup_profile = boot_file.get('profile')
+                        if startup_profile != 'dev':
+                            developer_startup_update = 'rockbox-file'
+                except (OSError, ValueError, KeyError, TypeError):
+                    pass
+            if startup_profile not in ('dev', 'trace'):
+                if not developer_startup_update:
+                    developer_update_error = ('Developer firmware requires a compatible startup selector. '
+                                              'The startup backup could not be verified. If Linnet was installed '
+                                              'on another computer, retry there.')
         boot_options = [option for option in boot_options if option["kind"] == "linnet" or
                         marker and marker.get("phase") == "restored" and option["id"] == _saved_previous_boot(marker)]
         for option in boot_options:
             if option["kind"] == "linnet":
-                option["selectable"] = available
+                error = developer_update_error if option['build'] == 'dev' else None
+                option["selectable"] = available and not error
+                if error:
+                    option["detail"] = error
+                elif option['build'] == 'dev' and developer_startup_update:
+                    option['detail'] = 'The first Developer update also updates the startup selector.'
         if linnet['state'] == 'installed' and not (marker and marker.get('phase') in ('restored','boot-upgrade-pending')):
             from tools.studio.apple_firmware import available as apple_available
             if apple_available(root, target_id):
@@ -642,6 +676,7 @@ def assess(identity, *, _validated_identity=False):
                             wrapper_model=expected_model),
                 retail_os=not native, linnet=linnet, rockbox=rockbox, other_installations=others,
                 boot_options=boot_options, installation_methods=installation_methods,
+                developer_update_error=developer_update_error, developer_startup_update=developer_startup_update,
                 default_installation_method=default_method,
                 uninstall=_uninstall_option(marker, linnet, root,
                                             identity.get("native_target_id") == target_id,
@@ -1302,6 +1337,21 @@ def install(identity, progress=lambda _message: None, build=None, installation_m
                     instruction=instruction,cancelled=cancelled)
 
 
+def _stage_native_volume(identity, image, game_library, progress):
+    from tools.studio.native_update import publish
+    if game_library:
+        from tools.content import games
+        from tools.content.guard import guarded_path, guard_volume
+        system = Path(identity['root']) / '.LINNET'
+        guarded_path(system, Path(identity['root']))
+        guard_volume(identity)
+        system.mkdir(exist_ok=True)
+        progress('Installing selected game packages…')
+        games.save(identity, games.read(identity), library=game_library)
+    progress('Writing and verifying Linnet…')
+    return publish(identity, image)
+
+
 def _install(identity, progress=lambda _message: None, build="user", installation_method=None,
             firmware=None, from_source=False, reviewed_route=None, *, instruction=lambda _event:None, cancelled=lambda:False):
     if build not in ("user", "dev"):
@@ -1321,6 +1371,28 @@ def _install(identity, progress=lambda _message: None, build="user", installatio
     if not method or not method["enabled"]:
         raise ValueError("the selected Linnet installation method is unavailable")
     strategy = method["strategy"]
+    if strategy == 'native-volume' and build == 'dev':
+        if reviewed['developer_update_error']:
+            raise ValueError(reviewed['developer_update_error'])
+        if reviewed['developer_startup_update'] == 'native-directory':
+            from tools.studio.boot_upgrade import upgrade
+            return upgrade(reviewed['identity'], build=build, firmware=firmware, from_source=from_source,
+                           stage_os=True, progress=progress)
+        if reviewed['developer_startup_update'] == 'rockbox-file':
+            from tools.studio.bootstrap import upgrade_boot_file
+            from tools.studio.firmware_bundle import load
+            current = reviewed['identity']
+            if from_source:
+                artifacts = build_artifacts(current, progress=progress, build=build,
+                                            installation_method='rockbox-loader')
+            else:
+                if firmware is None:
+                    raise ValueError('Choose a prebuilt Linnet firmware ZIP before installing.')
+                progress('Verifying the selected firmware bundle…')
+                artifacts = load(firmware, current, 'rockbox-loader', build=build)
+            progress('Updating the Rockbox startup selector…')
+            upgrade_boot_file(current, artifacts)
+            return _stage_native_volume(current, Path(artifacts['os_image']), artifacts.get('game_library'), progress)
     if strategy == 'classic-bootstrap':
         from tools.studio import classic_setup
         pending=reviewed.get('classic_setup')
@@ -1328,7 +1400,6 @@ def _install(identity, progress=lambda _message: None, build="user", installatio
               firmware=firmware,from_source=from_source,build=build,progress=progress))
         return classic_setup.run(path,progress=progress,instruction=instruction,cancelled=cancelled)
     if strategy == "native-volume":
-        from tools.studio.native_update import publish
         if from_source:
             profile = "release" if build == "user" else "dev"
             arguments = ["--target", reviewed["identity"]["target_id"], "--profile", profile, "--kind", "os", "--verify"]
@@ -1349,15 +1420,7 @@ def _install(identity, progress=lambda _message: None, build="user", installatio
             artifacts=load(firmware, reviewed["identity"], method_id, build=build)
             image = Path(artifacts["os_image"])
             game_library=artifacts.get('game_library')
-        if game_library:
-            from tools.content import games
-            from tools.content.guard import guarded_path,guard_volume
-            system=Path(reviewed['identity']['root'])/'.LINNET'
-            guarded_path(system,Path(reviewed['identity']['root']));guard_volume(reviewed['identity']);system.mkdir(exist_ok=True)
-            progress('Installing selected game packages…')
-            games.save(reviewed['identity'],games.read(reviewed['identity']),library=game_library)
-        progress("Writing and verifying Linnet…")
-        return publish(reviewed["identity"], image)
+        return _stage_native_volume(reviewed['identity'], image, game_library, progress)
     previous_boot = _previous_boot(reviewed)
     identity = reviewed["identity"]
     archive = (_archive_destination(identity["root"])

@@ -265,6 +265,34 @@ def load_plan(path, expected_sha):
     return manifest, artifacts, firmware
 
 
+def rebind_plan(manifest, artifacts, output, device):
+    """Use the reviewed connection identity without changing any firmware bytes."""
+    prior = _device(json.loads(artifacts['device.json']))
+    device = _device(device)
+    storage = device['storage']
+    if (device['target_id'] != manifest['target_id'] or
+            any(storage[key] != prior['storage'][key] for key in
+                ('disk_bytes', 'sector_bytes', 'partition_offset', 'partition_bytes'))):
+        raise ValueError('Startup plan geometry differs from the reviewed iPod')
+    output = Path(output)
+    output.mkdir(parents=True, exist_ok=False)
+    for name, data in artifacts.items():
+        if name != 'device.json':
+            (output / name).write_bytes(data)
+    device_path = output / 'device.json'
+    save_json(device_path, device)
+    data = device_path.read_bytes()
+    entries = dict(manifest['artifacts'])
+    entries['device.json'] = dict(bytes=len(data), sha256=sha(data))
+    rebound = dict(manifest, expected_storage_serial=storage['disk_serial'],
+                   expected_linnet_usb_serial=device['linnet_usb_serial'], artifacts=entries)
+    path = output / 'plan.json'
+    save_json(path, rebound)
+    digest = sha(path.read_bytes())
+    load_plan(path, digest)
+    return path, digest
+
+
 def identify_disk(number, manifest):
     if os.name != "nt" or type(number) is not int or not 0 <= number <= 1024:
         raise RuntimeError("raw apply requires an explicit Windows disk number")

@@ -106,8 +106,61 @@ def _install(mount, image, envelope, expected_original):
         temporary.replace(target)
     if digest(target.read_bytes())!=state['candidate_sha256']:
         raise OSError('published boot file failed readback; restore required')
-    state['phase']='installed';state_write(state_path,state)
+    state.update(phase='installed', profile=identity['profile'])
+    state_write(state_path,state)
     return state
+
+def upgrade_boot_file(identity, artifacts):
+    """Replace a verified Linnet wrapper while retaining the original Rockbox backup."""
+    from pathlib import Path
+    from tools.content.media_manager import refresh
+    from tools.content.publish import _exclusive, _plain, _volume_guard
+    from tools.studio.installer import _validate_artifacts
+    from tools.studio.targets import TARGETS
+
+    _validate_artifacts(identity, artifacts)
+    if artifacts['installation_method'] != 'rockbox-loader' or artifacts['boot_profile'] != 'dev':
+        raise ValueError('A matching Developer Rockbox loader is required')
+    with _exclusive(identity):
+        current = refresh(identity)
+        root = Path(current['root']).resolve(strict=True)
+        state_path = root/'.LINNET/RECOVERY/BOOTSTRAP.JSON'
+        current_state = status(root)
+        if (current_state['target_id'] != current['target_id'] or current_state['phase'] != 'installed' or
+                not current_state['backup_valid'] or current_state['active_sha256'] != current_state['candidate_sha256']):
+            raise ValueError('The installed Rockbox loader or its startup backup could not be verified')
+        candidate = Path(artifacts['boot_wrapper']).read_bytes()
+        update = dict(build_id=artifacts['boot_build_id'], profile='dev', candidate_sha256=digest(candidate))
+        if current_state['active_sha256'] == update['candidate_sha256']:
+            return current_state
+        state = json.loads(state_path.read_text())
+        if state.get('upgrade') and state['upgrade'] != update:
+            raise ValueError('Choose the same Developer firmware to resume the startup selector update')
+        target = root.joinpath(*TARGETS[current['target_id']]['installer']['file_loader'].split('/'))
+        staged = target.with_name('linnet-upgrade.ipod')
+        _plain(staged,root)
+        _volume_guard(current)
+        if staged.exists():
+            if staged.read_bytes() != candidate:
+                if not staged.is_file() or not candidate.startswith(staged.read_bytes()):
+                    raise ValueError('Saved startup selector staging differs from the reviewed firmware')
+                staged.unlink()
+        if not staged.exists():
+            sync_write(staged,candidate)
+        state['upgrade'] = update
+        state_write(state_path,state)
+        _volume_guard(current)
+        if digest(target.read_bytes()) != current_state['active_sha256']:
+            raise ValueError('The startup selector changed during the update')
+        staged.replace(target)
+        with target.open('r+b') as written:
+            os.fsync(written.fileno())
+        if digest(target.read_bytes()) != update['candidate_sha256']:
+            raise OSError('Updated Rockbox loader failed readback')
+        state.update(update)
+        state.pop('upgrade',None)
+        state_write(state_path,state)
+        return state
 
 def status(mount):
     mount=mount.resolve(strict=True)
@@ -127,6 +180,9 @@ def status(mount):
     _plain(mount/'.LINNET/RECOVERY/ORIGINAL.IPOD',mount)
     result=dict(state)
     result['active_sha256']=digest(target.read_bytes())
+    upgrade = state.get('upgrade')
+    if isinstance(upgrade,dict) and result['active_sha256'] == upgrade.get('candidate_sha256'):
+        result.update({key:upgrade[key] for key in ('build_id','profile','candidate_sha256')})
     result['backup_valid']=digest((mount/'.LINNET/RECOVERY/ORIGINAL.IPOD').read_bytes())==state['original_sha256']
     return result
 
@@ -175,5 +231,6 @@ def _restore(mount):
     if digest(target.read_bytes())!=state['original_sha256']:
         raise OSError('restored boot file failed verification')
     state['phase']='restored';state['active_sha256']=state['original_sha256']
+    state.pop('upgrade',None)
     state_write(mount/'.LINNET/RECOVERY/BOOTSTRAP.JSON',state)
     return state
