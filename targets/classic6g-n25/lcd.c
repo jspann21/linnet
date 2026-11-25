@@ -23,9 +23,11 @@ static void text(unsigned top,const char *message,uint16_t color) {
     unsigned left=width<LINNET_UI_WIDTH?(LINNET_UI_WIDTH-width)/2:0;
     for(;*message&&left<LINNET_UI_WIDTH;message++) {
         if(*message<32||*message>126)continue;unsigned glyph=(unsigned)*message-32;
-        for(unsigned y=0;y<22&&top+y<LINNET_UI_HEIGHT;y++)
+        for(unsigned y=0;y<2u*LINNET_BOOT_FONT_ROWS&&top+y<LINNET_UI_HEIGHT;y++) {
+            uint16_t bits=ln_boot_font_row(glyph,y/2);
             for(unsigned x=0;x<22&&left+x<LINNET_UI_WIDTH;x++)
-                if(glyphs[glyph][y/2]&(1u<<(x/2)))frame[(top+y)*LINNET_UI_WIDTH+left+x]=color;
+                if(bits&(1u<<(x/2)))frame[(top+y)*LINNET_UI_WIDTH+left+x]=color;
+        }
         left+=advances[glyph]*2u;
     }
 }

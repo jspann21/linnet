@@ -123,12 +123,12 @@ bool ln_target_disk_screen(bool symbol_visible){
     return ln_color_disk_finished(&decoder)&&ln_m25_lcd_commit()&&await_ready();
 }
 static void text_row(uint16_t row[320],uint32_t y,uint32_t top,const char *text,uint16_t color){
-    if(y<top||y>=top+22u)return;
+    if(y<top||y>=top+2u*LINNET_BOOT_FONT_ROWS)return;
     uint32_t width=0;for(const char *p=text;*p;++p)if(*p>=32&&*p<=126)width+=advances[(unsigned)*p-32]*2u;
     uint32_t x=width<320u?(320u-width)/2u:0;
     for(;*text&&x<320u;++text){
         if(*text<32||*text>126)continue;
-        uint32_t glyph=(unsigned)*text-32,bits=glyphs[glyph][(y-top)/2u];
+        uint32_t glyph=(unsigned)*text-32,bits=ln_boot_font_row(glyph,(y-top)/2u);
         for(uint32_t i=0;i<22u&&x+i<320u;++i)if(bits&(1u<<(i/2u)))row[x+i]=color;
         x+=advances[glyph]*2u;
     }

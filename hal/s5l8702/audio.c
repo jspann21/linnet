@@ -15,9 +15,12 @@ extern void ln_memory_copy(void *,const void *,uint32_t);
 extern uint32_t ln_time_us(void);
 #ifdef LINNET_SRAM_MONITOR
 #define AUDIO_MEMORY __attribute__((section(".dram.audio"),aligned(32)))
+/* The bootstrap monitor uses diagnostic playback, with no game audio. */
+static const bool idle_silence = false;
 #else
 /* DMA sees only submitted, cache-cleaned PCM; ring contents need no reset. */
 #define AUDIO_MEMORY __attribute__((section(".media_workspace"),aligned(32)))
+static volatile bool idle_silence;
 #endif
 #define BLOCK 1024u
 #define MASK (LINNET_AUDIO_RING_FRAMES-1u)
@@ -41,7 +44,6 @@ static volatile struct ln_audio_status status;
 static volatile uint32_t head,tail,inflight,armed,expected,previous,drain_until;
 static volatile uint32_t inflight_last;
 static volatile bool active,real,finishing,pause_pending,draining,starved,warming,start_armed,drain_ready,tail_ramp;
-static volatile bool idle_silence;
 static bool owned,codec_ready,lineout,muted,amplifier_open,clock_valid,powerdown_ready;
 static uint32_t frame_q12;
 static volatile uint32_t mute_until;
@@ -144,8 +146,13 @@ bool ln_audio_halt(void) {
     }
     uint32_t flags=ln_s5l_irq_save();ln_s5l_irq_enable(16,false);
     bool stopped=ln_s5l_pcm_stop();
-    if(stopped){active=draining=pause_pending=warming=click_playing=idle_silence=false;head=tail=inflight=0;status.initialized=status.playing=status.paused=0;}
-    else fault(3);
+    if(stopped){
+#ifndef LINNET_SRAM_MONITOR
+        idle_silence=false;
+#endif
+        active=draining=pause_pending=warming=click_playing=false;
+        head=tail=inflight=0;status.initialized=status.playing=status.paused=0;
+    } else fault(3);
     ln_s5l_irq_restore(flags);
     if(!stopped&&codec_ready){
         /* pcm_stop may have raised the first fault after the earlier check. */
@@ -187,7 +194,10 @@ bool ln_audio_init(uint32_t rate) {
     uint32_t old_rate=status.rate;
     int32_t volume=warm?status.volume_db_tenths:-400;
     if(!ln_audio_halt())return false;
-    status=(struct ln_audio_status){0};head=tail=inflight=0;active=draining=finishing=pause_pending=starved=warming=drain_ready=idle_silence=false;
+    status=(struct ln_audio_status){0};head=tail=inflight=0;active=draining=finishing=pause_pending=starved=warming=drain_ready=false;
+#ifndef LINNET_SRAM_MONITOR
+    idle_silence=false;
+#endif
     for(uint32_t i=0;i<BLOCK;i++)silence[i]=0;
     tail_ramp=false;fade_remaining=0;
     owned=true;previous=0;frame_q12=period;mute_until=0;
@@ -311,7 +321,9 @@ failed:
     warming=false;ln_audio_service(ln_time_us());return false;
 }
 bool ln_audio_start(void){return start_output(true);}
+#ifndef LINNET_SRAM_MONITOR
 bool ln_audio_start_with_silence(void){idle_silence=true;return start_output(true);}
+#endif
 void ln_audio_pause(void) {
     if((!status.playing&&!click_playing) || pause_pending || draining)return;
     /* Keep LRCK running while the digital soft ramp settles. Headphone
@@ -387,8 +399,10 @@ uint32_t ln_audio_deadline(uint32_t now){
 void ln_audio_snapshot(struct ln_audio_status *out) {
     if(!out)return;
     uint32_t flags=ln_s5l_irq_save();*out=status;out->queued=head-tail;out->free_frames=ln_audio_capacity();
+#ifndef LINNET_SRAM_MONITOR
     out->interactive=idle_silence;
     if(idle_silence&&!out->queued)out->playing=0;
+#endif
     if(active&&real){
         uint32_t dma[5];ln_s5l_pcm_status(dma);
         uint32_t remaining=(dma[2]+1u)/2u;
