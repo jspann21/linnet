@@ -47,7 +47,7 @@ h264_decoder = "s5l8702-vpu"
 mpeg4_decoder = "s5l8702-vpu"
 media_video_extensions = [".mp4", ".m4v", ".mov"]
 cop_display = false
-runtime_policy = { music_browse_index = true, extended_sound = true }
+runtime_policy = { music_browse_index = true, extended_sound = true, retail_clicker_routing = true }
 entry_address = 134217728
 load_address = 134217728
 mailbox_address = 201322496

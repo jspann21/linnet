@@ -2,6 +2,7 @@
 #define LINNET_HAL_AUDIO_H
 #include <stdint.h>
 #include <stdbool.h>
+#include "linnet_target.h"
 /* Covers bounded next-file chain verification while current audio continues.
  * 256KiB at stereo16-bit gives1.49s at44.1kHz; startup primes only8192frames. */
 #define LINNET_AUDIO_RING_FRAMES 65536u
@@ -41,8 +42,8 @@ bool ln_audio_lineout(bool enabled);
  * Standalone clicks never consume queued music or advance its frame counters. */
 void ln_audio_click(uint8_t tone,uint8_t volume,int32_t output_db_tenths);
 void ln_audio_click_stop(void);
-#if defined(LINNET_TARGET_CLASSIC6G_N25) && defined(LINNET_IMAGE_OS)
-/* Retain the Classic headphone codec across idle gaps in menu feedback. */
+#if defined(LINNET_HEADPHONE_CLICK_STANDBY) && defined(LINNET_IMAGE_OS)
+/* Retain the headphone codec across idle gaps in menu feedback. */
 void ln_audio_click_standby(bool retain,bool enabled,int32_t output_db_tenths);
 #endif
 /* UINT32_MAX when no feedback drain or idle power-down needs a wake. */

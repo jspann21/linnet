@@ -654,7 +654,7 @@ static void apply(uint32_t kind,int32_t value){
                 uint32_t sound_action=ln_music_sound_action(row);
                 if(ln_sound_menu_click(sound_action)){
                     click_feedback_stop();
-#if defined(LINNET_TARGET_CLASSIC6G_N25)
+#if LINNET_RETAIL_CLICKER_ROUTING
                     if(sound_action==LN_SOUND_CLICKER||sound_action==LN_SOUND_CLICK_VOLUME)
 #endif
                         click_feedback();
@@ -1075,7 +1075,7 @@ void ln_runtime_step(void){
 #endif
 #if defined(LINNET_AUDIO)
     ln_audio_service(now);
-#if defined(LINNET_TARGET_CLASSIC6G_N25) && defined(LINNET_IMAGE_OS)
+#if defined(LINNET_HEADPHONE_CLICK_STANDBY) && defined(LINNET_IMAGE_OS)
     {
         struct ln_player_status player;ln_player_snapshot(&player);
         uint8_t output=ln_display_click_output();

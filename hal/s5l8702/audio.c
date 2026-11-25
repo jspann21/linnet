@@ -18,12 +18,15 @@ extern uint32_t ln_time_us(void);
 #define AUDIO_MEMORY __attribute__((section(".dram.audio"),aligned(32)))
 /* The bootstrap monitor uses diagnostic playback, with no game audio. */
 static const bool idle_silence = false;
-static const bool click_standby = false;
 #else
 /* DMA sees only submitted, cache-cleaned PCM; ring contents need no reset. */
 #define AUDIO_MEMORY __attribute__((section(".media_workspace"),aligned(32)))
 static volatile bool idle_silence;
+#endif
+#if defined(LINNET_HEADPHONE_CLICK_STANDBY) && defined(LINNET_IMAGE_OS)
 static volatile bool click_standby;
+#else
+static const bool click_standby = false;
 #endif
 #define BLOCK 1024u
 #define CLICK_BLOCK 256u
@@ -371,6 +374,8 @@ failed:
 bool ln_audio_start(void){return start_output(true);}
 #ifndef LINNET_SRAM_MONITOR
 bool ln_audio_start_with_silence(void){idle_silence=true;return start_output(true);}
+#endif
+#if defined(LINNET_HEADPHONE_CLICK_STANDBY) && defined(LINNET_IMAGE_OS)
 void ln_audio_click_standby(bool retain,bool enabled,int32_t volume){
     if(!retain){
         if(click_standby){

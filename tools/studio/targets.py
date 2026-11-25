@@ -20,7 +20,8 @@ REQUIRED_KEYS = {
 }
 OPTIONAL_KEYS = {"ui", "hal_family", "audio_codec", "idle_clock_hz", "active_clock_hz", "native_video", "game_presentation", "presentation_policy", "video_start_audio_frames",
                  "sdram_address", "build_enabled", "bringup_blocker", "presentation_profile", "runtime_policy", "native_storage", "h264_decoder", "mpeg4_decoder", "video_catalog_cache", "coverflow_cache", "boot_size_optimization"}
-RUNTIME_POLICIES = {"display_pipeline", "audio_render_reserve", "music_browse_index", "extended_sound", "resident_monitor"}
+RUNTIME_POLICIES = {"display_pipeline", "audio_render_reserve", "music_browse_index", "extended_sound", "resident_monitor",
+                    "retail_clicker_routing"}
 PRESENTATION_POLICIES = {"music_hint_menu_back", "battery_theme_monochrome"}
 CAPABILITIES = {"photos", "video", "files", "demo", "themes", "cover_flow", "games"}
 GAME_PRESENTATIONS = {"photo220": (220, 176), "color320": (320, 240)}
