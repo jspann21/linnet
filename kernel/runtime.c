@@ -654,7 +654,8 @@ static void apply(uint32_t kind,int32_t value){
                 uint32_t sound_action=ln_music_sound_action(row);
                 if(ln_sound_menu_click(sound_action)){
                     click_feedback_stop();
-#if LINNET_RETAIL_CLICKER_ROUTING
+#if LINNET_RETAIL_CLICKER_ROUTING || defined(LINNET_HEADPHONE_CLICK_STANDBY)
+                    /* Change routing before the next navigation click opens the headphone output. */
                     if(sound_action==LN_SOUND_CLICKER||sound_action==LN_SOUND_CLICK_VOLUME)
 #endif
                         click_feedback();
@@ -1078,13 +1079,15 @@ void ln_runtime_step(void){
 #if defined(LINNET_HEADPHONE_CLICK_STANDBY) && defined(LINNET_IMAGE_OS)
     {
         struct ln_player_status player;ln_player_snapshot(&player);
-        uint8_t output=ln_display_click_output();
         bool retain=!sleeping&&!shell->hold&&shell->headphones&&!scene_is(LN_UI_SCENE_GAME_PLAY)&&
             (player.phase==LN_PLAYER_IDLE||player.phase==LN_PLAYER_PAUSE);
 #if defined(LINNET_VIDEO)
         retain=retain&&!video_scene()&&!video_requested&&!ln_video_active()&&!ln_video_pending();
 #endif
-        bool prime=retain&&output!=LN_CLICK_SPEAKER&&ln_display_click_tone()!=1u&&ln_display_click_volume();
+        bool prime=retain&&ln_display_click_tone()!=1u&&ln_display_click_volume();
+#if !defined(LINNET_HEADPHONE_CLICK_SILENT_STREAM)
+        prime=prime&&ln_display_click_output()!=LN_CLICK_SPEAKER;
+#endif
         ln_audio_click_standby(retain,prime,prime?ln_music_output_volume():0);
     }
 #endif

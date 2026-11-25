@@ -8,6 +8,9 @@
 #include "hal/api/platform.h"
 #include "hal/api/power.h"
 #include "hal/codecs/codec.h"
+#if defined(LINNET_HEADPHONE_CLICK_STANDBY) && defined(LINNET_IMAGE_OS)
+#include "hal/codecs/wm8758.h"
+#endif
 #define REG(a) (*(volatile uint32_t *)(uintptr_t)(a))
 #define IRQ (1u<<26)
 #define CMD REG(0x6000b000u)
@@ -16,6 +19,7 @@
 #define IIS REG(0x70002800u)
 #define FIFO REG(0x7000280cu)
 #define CHUNK 1024u
+#define CLICK_POWERDOWN_US 500000u
 #define MASK (LINNET_AUDIO_RING_FRAMES-1u)
 /* Cleared cursors publish only submitted PCM; DMA never reads unused slots. */
 static uint32_t ring[LINNET_AUDIO_RING_FRAMES] __attribute__((section(".media_workspace"),aligned(32)));
@@ -30,6 +34,11 @@ static volatile struct ln_pcm_click click;
 static bool click_owned;
 static volatile bool click_block,click_playing;
 static uint32_t click_last;
+#if defined(LINNET_HEADPHONE_CLICK_STANDBY) && defined(LINNET_IMAGE_OS)
+static volatile bool click_standby;
+#else
+static const bool click_standby=false;
+#endif
 static volatile struct ln_audio_status state;
 static volatile uint32_t head,tail,inflight;
 static volatile uint32_t inflight_last;
@@ -82,11 +91,18 @@ static void arm(bool drain)
     uint32_t offset=tail&MASK;
     if(count>LINNET_AUDIO_RING_FRAMES-offset)count=LINNET_AUDIO_RING_FRAMES-offset;
     volatile uint32_t *source;
-    click_block=!state.playing&&!drain;
+    bool click_only=!state.playing&&!drain;
+    click_block=click_only&&click.left;
     if(drain){source=native(silence);count=CHUNK;real_block=false;}
     else if(count){source=native(ring)+offset;real_block=true;starved=false;}
-    else {source=native(silence);count=click_block?click.left:idle_silence?CHUNK/2u:CHUNK;real_block=false;
-        if(!click_block&&!idle_silence){if(!starved)++state.underruns;starved=true;}}
+    else {
+        source=native(silence);real_block=false;
+        if(click_only)count=click_block||!click_standby?click.left:CHUNK/2u;
+        else {
+            count=idle_silence?CHUNK/2u:CHUNK;
+            if(!idle_silence){if(!starved)++state.underruns;starved=true;}
+        }
+    }
     if(!count)return;
     /* A short feedback tone needs no copy of the following unmodified music
      * in IRQ context. Resume directly from the ring on the next completion. */
@@ -115,7 +131,7 @@ static void arm(bool drain)
     if(!drain&&ln_pcm_click_mix(&click,(uint32_t *)native(click_pcm),(const uint32_t *)source,count))source=native(click_pcm);
     inflight_last=real_block?source[count-1u]:0;
     inflight=count;active=true;dma_quiet=false;
-    if(real_block||click_block||(idle_silence&&!drain))start_armed=true;
+    if(real_block||click_block||(!drain&&(idle_silence||(click_only&&click_standby))))start_armed=true;
     state.last_irq_us=ln_time_us();
     armed_us=state.last_irq_us;
     /* Rates are >=8kHz and count<=1024: both products fit uint32_t.
@@ -236,13 +252,27 @@ failed:
 void ln_audio_click_stop(void){
     uint32_t flags=ln_core_irq_save();ln_pcm_click_clear(&click);ln_core_irq_restore(flags);
 }
+static bool init_click_output(int32_t volume){
+    if(state.initialized)return true;
+    if(!ln_audio_init(44100u))return false;
+    click_owned=true;
+    click_last=ln_time_us();
+    if(ln_audio_volume(volume))return true;
+    (void)ln_audio_stop();return false;
+}
+#if defined(LINNET_HEADPHONE_CLICK_STANDBY) && defined(LINNET_IMAGE_OS)
+void ln_audio_click_standby(bool retain,bool enabled,int32_t volume){
+    bool standby=retain&&(enabled||click_standby);
+    if(click_standby&&!standby)click_last=ln_time_us();
+    click_standby=standby;
+    /* Prime once while the jack is in use. Routing only controls which sink
+     * receives the click. The running stream continues to feed zeros. */
+    if(enabled&&!state.fault)(void)init_click_output(volume);
+}
+#endif
 void ln_audio_click(uint8_t tone,uint8_t volume,int32_t output_db_tenths){
     if(tone>3u||tone==1u||!volume||volume>4u)return;
-    if(!state.initialized){
-        if(!ln_audio_init(44100u))return;
-        click_owned=true;
-        if(!ln_audio_volume(output_db_tenths)){(void)ln_audio_stop();return;}
-    }
+    if(!init_click_output(output_db_tenths))return;
     if(state.fault)return;
     uint32_t flags=ln_core_irq_save();
     ln_pcm_click_request(&click,state.rate,tone,volume);click_last=ln_time_us();
@@ -290,7 +320,7 @@ static bool startup_wait(uint32_t began,uint32_t timeout)
  * while state.playing and the ring cursors continue to describe media only. */
 static bool start_output(bool media)
 {
-    if(!state.initialized||state.fault||(media?head==tail&&!idle_silence:!click.left))return false;
+    if(!state.initialized||state.fault||(media?head==tail&&!idle_silence:!click.left&&!click_standby))return false;
     if(state.playing&&!pause_pending&&!draining&&!digital_muted)return true;
     uint32_t flags=ln_core_irq_save();
     bool continuing=active&&real_block&&!output_muted;
@@ -313,6 +343,14 @@ static bool start_output(bool media)
     /* Output gain is restored immediately under digital mute after a zero
      * block has flushed the FIFO, rather than waiting for a zero crossing. */
     if(output_muted){
+#if defined(LINNET_HEADPHONE_CLICK_STANDBY) && defined(LINNET_IMAGE_OS)
+        if(!media){
+            /* Open the headphone PGA at minimum gain on a silent stream. */
+            if(!ln_wm8758_unmute_headphones_at_minimum(codec)){fault(3);goto failed;}
+            zeros=state.silence_frames;
+            while(state.silence_frames==zeros)if(!startup_wait(began,timeout))goto failed;
+        }
+#endif
         output_muted=false;
         if(!ln_codec_analog_mute(codec,false)){fault(3);goto failed;}
     }
@@ -322,7 +360,12 @@ static bool start_output(bool media)
     /* WM8758 documents a soft ramp but no maximum ramp time. Release it on
      * zero data, then make the PCM onset itself continuous at the next IRQ. */
     digital_muted=false;
-    if(!ln_codec_digital_mute(codec,false)){fault(3);goto failed;}
+#if defined(LINNET_HEADPHONE_CLICK_STANDBY) && defined(LINNET_IMAGE_OS)
+    bool unmuted=media?ln_codec_digital_mute(codec,false):ln_wm8758_unmute_clicks(codec);
+#else
+    bool unmuted=ln_codec_digital_mute(codec,false);
+#endif
+    if(!unmuted){fault(3);goto failed;}
     ready=ln_time_us()+10000u;
     while((int32_t)(ln_time_us()-ready)<0)if(!startup_wait(began,timeout))goto failed;
     fade_remaining=64u;
@@ -373,7 +416,8 @@ void ln_audio_irq(void)
     if(tail_ramp){for(uint32_t i=0;i<64u;i++)native(silence)[i]=0;tail_ramp=false;}
     active=false;inflight=0;state.last_irq_us=started;
     if(draining)drain_ready=true;
-    else if(!warming&&((pause_pending&&(int32_t)(started-mute_until)>=0)||(state.playing&&finishing&&tail==head)||(click_block&&!state.playing&&!click.left))){
+    else if(!warming&&((pause_pending&&(int32_t)(started-mute_until)>=0)||(state.playing&&finishing&&tail==head)||
+            (click_playing&&!click_standby&&!state.playing&&!click.left))){
         pause_pending=false;draining=true;drain_ready=false;drain_until=started;
 #if defined(LINNET_TARGET_VIDEO5G_M25)
         /* Even if soft mute has not settled, the last PCM sample reaches
@@ -417,14 +461,15 @@ void ln_audio_service(uint32_t now)
         if(codec_ready&&!output_muted)output_muted=ln_codec_mute(codec,true);
         flags=ln_core_irq_save();if(active)(void)quiesce();ln_core_irq_restore(flags);
     }
-    if(state.initialized&&!state.fault&&!state.playing&&!click_playing&&!active&&!draining&&click.left)
+    if(state.initialized&&!state.fault&&!state.playing&&!click_playing&&!active&&!draining&&(click.left||click_standby))
         (void)start_output(false);
-    if(click_owned&&(state.fault||(!active&&!draining&&!click.left&&(int32_t)(ln_time_us()-click_last)>=500000)))(void)ln_audio_stop();
+    if(click_owned&&(state.fault||(!click_standby&&!active&&!draining&&!click.left&&
+       ln_time_us()-click_last>=CLICK_POWERDOWN_US)))(void)ln_audio_stop();
 }
 uint32_t ln_audio_deadline(uint32_t now){
     if(state.fault)return UINT32_MAX;
-    if(draining||click.left)return now+1000u;
-    if(click_owned)return (int32_t)(now-(click_last+500000u))>=0?now:click_last+500000u;
+    if(draining||click.left||(click_standby&&state.initialized&&!state.playing&&!active))return now+1000u;
+    if(click_owned&&!click_standby)return (int32_t)(now-(click_last+CLICK_POWERDOWN_US))>=0?now:click_last+CLICK_POWERDOWN_US;
     return UINT32_MAX;
 }
 void ln_audio_snapshot(struct ln_audio_status *out)

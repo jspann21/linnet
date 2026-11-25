@@ -1,5 +1,5 @@
 /* WM8758 playback configuration for iPod Video. */
-#include "hal/codecs/codec.h"
+#include "hal/codecs/wm8758.h"
 #include "hal/api/core.h"
 static uint16_t headphone_level;
 static bool output_muted=true,lineout_enabled;
@@ -50,6 +50,13 @@ bool ln_codec_lineout(ln_codec_writer write,bool enabled){
     lineout_enabled=enabled;return true;
 }
 bool ln_codec_digital_mute(ln_codec_writer write,bool mute){return write(0x0a,mute?0x48u:8u);}
+bool ln_wm8758_unmute_clicks(ln_codec_writer write){
+    /* AMUTE closes the DAC after 1024 zero frames and opens it on signal. */
+    return write(0x0a,0x0cu);
+}
+bool ln_wm8758_unmute_headphones_at_minimum(ln_codec_writer write){
+    return headphones(write,0,false,false);
+}
 bool ln_codec_analog_mute(ln_codec_writer write,bool mute){
     if(mute){
         output_muted=true;
