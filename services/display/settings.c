@@ -94,6 +94,9 @@ void ln_display_settings_diagnostics(uint32_t words[8]){
 }
 #endif
 void ln_display_settings_init(void){menus_loaded=false;about_loaded=false;about_phase=about_count=about_percent=0;about_ata_ready=false;about_ata_count=0;for(uint32_t i=0;i<LN_GAME_COUNT;++i)game_best[i]=0;shutdown_choice[0]=shutdown_choice[1]=0;clock_12=false;update_known=false;for(uint32_t i=0;i<5;++i)update_labels[i][0]=0;battery_capacity=1200;choice=4;click_tone=0;click_volume=4;click_output=LN_CLICK_AUTO;click_enabled=true;click_fallback_ready=click_changed=click_volume_changed=click_output_changed=click_enabled_changed=false;video_resume[0]=video_resume[1]=0;video_options=8u;revision=record_revision=0;loaded=dirty=false;record_first_dirty_at=record_last_dirty_at=0;theme_index=UINT32_MAX;theme_revision=0;theme_loaded=theme_dirty=theme_available=step_busy=prefs_dirty=prefs_menus=false;prefs_revision=0;ln_preferences_restore_brightness(100);for(uint32_t i=0;i<16;++i)photo_resume[i]=0;
+#if defined(LINNET_TARGET_CLASSIC6G_N25)
+    click_output=LN_CLICK_BOTH;
+#endif
     (void)ln_ui_apple_font_load(0,0);
 #if LINNET_UI_WIDTH!=160u
     apple_font_loaded=false;apple_font_phase=0;

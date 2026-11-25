@@ -3,10 +3,24 @@
 #include "cs42l55.h"
 #include "hal/api/core.h"
 static bool output_muted=true,lineout_enabled;
+static uint8_t output_gain;
 static bool lineout(ln_codec_writer write,bool enabled,bool mute) {
-    uint16_t value=enabled&&!mute?0:0x80;
+    uint16_t value=enabled&&!mute?output_gain:0xc0;
     bool left=write(0x1c,value),right=write(0x1d,value);return left&&right;
 }
+static bool set_output_gain(ln_codec_writer write,uint8_t gain){
+    bool left=write(0x1a,gain),right=write(0x1b,gain);
+    if(!lineout_enabled)return left&&right;
+    bool dock_left=write(0x1c,gain),dock_right=write(0x1d,gain);
+    return left&&right&&dock_left&&dock_right;
+}
+static bool minimum_output(ln_codec_writer write,bool mute){
+    uint8_t hp=mute?0xc0:0x40,line=mute||!lineout_enabled?0xc0:0x40;
+    bool left=write(0x1a,hp),right=write(0x1b,hp);
+    bool dock_left=write(0x1c,line),dock_right=write(0x1d,line);
+    return left&&right&&dock_left&&dock_right;
+}
+bool ln_cs42l55_unmute_at_minimum(ln_codec_writer write){return minimum_output(write,false);}
 static uint8_t rate_value(uint32_t rate) {
     switch(rate) {
     case 8000:return 0x1d;case 11025:return 0x1b;case 12000:return 0x19;
@@ -22,8 +36,17 @@ bool ln_codec_rate(ln_codec_writer write,uint32_t rate) {
 bool ln_codec_volume(ln_codec_writer write,int32_t value) {
     if(value<-1020 || value>0)return false;
     /* Exact unsigned division by five without an ARM runtime helper. */
-    int32_t steps=-(int32_t)(((uint64_t)(4-value)*0xcccccccdu)>>34);
-    return write(0x18,(uint8_t)steps) && write(0x19,(uint8_t)steps);
+    uint32_t steps=(uint32_t)(((uint64_t)(4-value)*0xcccccccdu)>>34);
+    /* Apply whole dB steps at the output amplifiers, where they also
+     * attenuate the DAC noise floor. Master volume carries the remainder. */
+    uint32_t analog=steps/2u;
+    if(analog>60u)analog=60u;
+    uint8_t gain=(uint8_t)(0u-analog)&0x7fu;
+    uint8_t digital=(uint8_t)(2u*analog-steps);
+    if(!write(0x18,digital)||!write(0x19,digital))return false;
+    if(!output_muted&&output_gain!=gain&&!set_output_gain(write,gain))return false;
+    output_gain=gain;
+    return true;
 }
 bool ln_codec_lineout(ln_codec_writer write,bool enabled) {
     if(!lineout(write,enabled,output_muted)||!write(3,enabled?0xaa:0xaf))return false;
@@ -32,12 +55,12 @@ bool ln_codec_lineout(ln_codec_writer write,bool enabled) {
 bool ln_codec_analog_mute(ln_codec_writer write,bool mute) {
     if(mute){
         output_muted=true;
-        /* Bit 7 mutes; bits 0..6 are signed gain. Keep unity while muted,
-         * avoiding an extra -64 dB zero-cross gain change on every restart. */
-        bool left=write(0x1a,0x80),right=write(0x1b,0x80);
+        /* Bit 7 mutes. Preserve the selected gain across a warm mute. */
+        uint8_t value=0x80u|output_gain;
+        bool left=write(0x1a,value),right=write(0x1b,value);
         bool dock=lineout(write,lineout_enabled,true);return left&&right&&dock;
     }
-    if(!write(0x1a,0)||!write(0x1b,0)||!lineout(write,lineout_enabled,false))return false;
+    if(!set_output_gain(write,output_gain))return false;
     output_muted=false;return true;
 }
 bool ln_codec_mute(ln_codec_writer write,bool mute) {
@@ -53,9 +76,8 @@ bool ln_cs42l55_shutdown(ln_codec_writer write,uint32_t settling_us) {
      * PDN. Do not reuse output_muted: a prior partial I2C write can set it.
      * ANLGZC can defer these controls for 1024 LRCK periods (6.7.2). */
     bool digital=ln_codec_digital_mute(write,true);
-    bool hp_left=write(0x1a,0xc0),hp_right=write(0x1b,0xc0);
-    bool line_left=write(0x1c,0xc0),line_right=write(0x1d,0xc0);
-    if(!digital||!hp_left||!hp_right||!line_left||!line_right)return false;
+    bool analog=minimum_output(write,true);
+    if(!digital||!analog)return false;
     output_muted=true;
     /* The core delay API accepts at most100ms per call. */
     while(settling_us){
@@ -77,7 +99,9 @@ bool ln_codec_init(ln_codec_writer write,uint32_t rate) {
         {0x3e,0x81},{0x3f,0x46},{0,0}};
     for(unsigned i=0;i<sizeof(compensation)/sizeof(compensation[0]);i++)
         if(!write(compensation[i][0],compensation[i][1]))return false;
-    if(!ln_codec_mute(write,true) || !ln_codec_lineout(write,false) ||
+    /* DS773F1 4.11 requires both analog mute and maximum attenuation
+     * before releasing PDN for playback. */
+    if(!ln_codec_digital_mute(write,true) || !minimum_output(write,true) || !write(3,0xaf) ||
        !write(4,0x2e) || !ln_codec_rate(write,rate) || !write(7,0x1c) ||
        !write(8,0) || !write(0x0b,0) || !write(0x0c,0) ||
        !write(6,0x30) || !ln_codec_volume(write,-180) || !write(2,6))return false;
