@@ -155,6 +155,10 @@ bool ln_audio_lineout(bool enabled)
 bool ln_audio_halt(void)
 {
     ln_audio_click_stop();
+#if defined(LINNET_HEADPHONE_CLICK_STANDBY) && defined(LINNET_IMAGE_OS)
+    /* The drain calls audio service, which must not restart idle Clicker DMA. */
+    if(click_standby){click_standby=false;click_last=ln_time_us();}
+#endif
     if(!owned)return true;
     if(halted)return true;
     bool settled=true;
